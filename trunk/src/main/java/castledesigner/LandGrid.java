@@ -39,7 +39,7 @@ public class LandGrid extends JPanel
 	private static final int tileWidth = 14;
 	private static final int numRows = 52;
 	private int gridOffsetX = 20;
-	private int gridOffsetY = 50;
+	private int gridOffsetY = 20;
 	private TileBuilding[][] gridData = new TileBuilding[numRows][numRows];
 	
 	private String coordinates = "[0, 0]";
@@ -214,7 +214,7 @@ public class LandGrid extends JPanel
 	{
 		super.paintComponent(g);
 		
-		g.drawString(coordinates, 10, 20);
+		g.drawString(coordinates, 10, 15);
 		
 		g.translate(gridOffsetX, gridOffsetY);
 		
