@@ -87,10 +87,12 @@ public class Editor
 
 		fileChooser = new JFileChooser();
 
+		JScrollPane mainScrollPane = new JScrollPane(mainPanel);
+
 		frame = new JFrame("Stronghold Kingdoms Castle Designer");
 		frame.setJMenuBar(createMenuBar());
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.getContentPane().add(mainPanel);
+		frame.getContentPane().add(mainScrollPane);
 		frame.pack();
 		frame.setVisible(true);
 	}
