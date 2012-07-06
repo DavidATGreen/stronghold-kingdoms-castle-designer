@@ -49,7 +49,7 @@ public class LandGrid extends JPanel
 	private static int lastIdUsed = 0;
 
 	private int button = MouseEvent.NOBUTTON;
-	
+
 	public LandGrid()
 	{
 		resetGridData();
@@ -223,8 +223,15 @@ public class LandGrid extends JPanel
 		{
 			for (int j=0; j<numRows; j++)
 			{
-				if (gridData[i][j] != null) g.setColor(gridData[i][j].getBuildingType().getColour());
-				else g.setColor(GRASS);
+				if (gridData[i][j] != null && gridData[i][j].getBuildingType().getImage() == null)
+				{
+					g.setColor(gridData[i][j].getBuildingType().getColour());
+				}
+				else
+				{
+					//Fill with grass anyway since we might have transparent images (i.e. turret)
+					g.setColor(GRASS);
+				}
 				
 				g.fillRect(i*tileWidth, j*tileWidth, tileWidth, tileWidth);
 			}
@@ -236,6 +243,23 @@ public class LandGrid extends JPanel
 		{
 			g.drawLine(i*tileWidth, 0, i*tileWidth, tileWidth*numRows);
 			g.drawLine(0, i*tileWidth, tileWidth*numRows, i*tileWidth);
+		}
+
+		Set<Integer> ids = new HashSet<Integer>();
+		for (int i=0; i<numRows; i++)
+		{
+			for (int j=0; j<numRows; j++)
+			{
+				if (gridData[i][j] != null)
+				{
+					if ((gridData[i][j].getBuildingType().getImage() != null) &&
+						!ids.contains(gridData[i][j].getBuildingId()))
+					{
+						ids.add(gridData[i][j].getBuildingId());
+						g.drawImage(gridData[i][j].getBuildingType().getImage(), i*tileWidth+1, j*tileWidth+1, null);
+					}
+				}
+			}
 		}
 	}
 
@@ -328,7 +352,6 @@ public class LandGrid extends JPanel
 			int i=0;
 			while (i < dataStrings[0].length())
 			{
-				System.out.println("wood: " + dataStrings[0]);
 				int x = Converter.alphaNumericToInt(dataStrings[0].charAt(i));
 				int y = Converter.alphaNumericToInt(dataStrings[0].charAt(i+1));
 				
