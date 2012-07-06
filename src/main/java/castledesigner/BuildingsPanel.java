@@ -25,6 +25,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.ButtonGroup;
 import javax.swing.GroupLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
@@ -75,46 +76,47 @@ public class BuildingsPanel extends JPanel
 			layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 			.addGroup(layout.createSequentialGroup()
 					.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-						.addComponent(woodenWallButton)
 						.addComponent(stoneWallButton)
-						.addComponent(smallTowerButton)
-						.addComponent(guardHouseButton)
-						.addComponent(smelterButton))
-					.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-						.addComponent(woodenTowerButton)
 						.addComponent(stoneGatehouseButton)
+						.addComponent(guardHouseButton)
+						.addComponent(lookoutTowerButton)
 						.addComponent(largeTowerButton)
+						.addComponent(smelterButton)
+						.addComponent(turretButton))
+					.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+						.addComponent(woodenWallButton)
+						.addComponent(woodenGatehouseButton)
+						.addComponent(woodenTowerButton)
+						.addComponent(smallTowerButton)
+						.addComponent(greatTowerButton)
 						.addComponent(ballistaTowerButton)
 						.addComponent(moatButton))
-					.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-						.addComponent(woodenGatehouseButton)
-						.addComponent(lookoutTowerButton)
-						.addComponent(greatTowerButton)
-						.addComponent(turretButton))
-					)
+				)
 			.addComponent(tip1)
 			.addComponent(tip2)
 		);
 		layout.setVerticalGroup(
 			layout.createSequentialGroup()
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-					.addComponent(woodenWallButton)
-					.addComponent(woodenTowerButton)
+					.addComponent(stoneWallButton)
+					.addComponent(woodenWallButton))
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+					.addComponent(stoneGatehouseButton)
 					.addComponent(woodenGatehouseButton))
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-					.addComponent(stoneWallButton)
-					.addComponent(stoneGatehouseButton)
-					.addComponent(lookoutTowerButton))
+					.addComponent(guardHouseButton)
+					.addComponent(woodenTowerButton))
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-					.addComponent(smallTowerButton)
+					.addComponent(lookoutTowerButton)
+					.addComponent(smallTowerButton))
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 					.addComponent(largeTowerButton)
 					.addComponent(greatTowerButton))
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-					.addComponent(guardHouseButton)
-					.addComponent(ballistaTowerButton)
-					.addComponent(turretButton))
-				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 					.addComponent(smelterButton)
+					.addComponent(ballistaTowerButton))
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+					.addComponent(turretButton)
 					.addComponent(moatButton))
 				.addComponent(tip1)
 				.addComponent(tip2)
@@ -124,11 +126,17 @@ public class BuildingsPanel extends JPanel
 
 	private JToggleButton createButton(String buttonText, final BuildingType buildingType)
 	{
-		JToggleButton button = new JToggleButton(buttonText);
+		JToggleButton button;
+		if (buildingType.getImage() != null) button = new JToggleButton(buttonText, new ImageIcon(buildingType.getImage()));
+		else
+		{
+			button = new JToggleButton(buttonText);
+			button.setBackground(buildingType.getColour());
+		}
+
 		button.setPreferredSize(buttonDimension);
 		button.setMinimumSize(buttonDimension);
 		button.setSize(buttonDimension);
-		button.setBackground(buildingType.getColour());
 		button.addActionListener(new ActionListener()
 		{
 			public void actionPerformed(ActionEvent e)

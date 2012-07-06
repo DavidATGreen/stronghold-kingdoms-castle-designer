@@ -22,6 +22,9 @@ package castledesigner;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.net.URL;
 
 /**
  * Enumerations representing the different types of buildings we use.
@@ -56,6 +59,7 @@ public enum BuildingType
 	private final Color colour;
 	private Dimension dimension;
 	private boolean gapRequired;
+	private Image image;
 	
 	/**
 	 * Constructor
@@ -70,6 +74,14 @@ public enum BuildingType
 		this.colour = colour;
 		this.dimension = dimension;
 		this.gapRequired = gapRequired;
+
+		String urlPath = "/buildings/" + name() + ".png";
+		URL url = getClass().getResource(urlPath.toLowerCase());
+		
+		if (url != null)
+		{
+			image = Toolkit.getDefaultToolkit().createImage(url);
+		}
 	}
 
 	/**
@@ -101,5 +113,16 @@ public enum BuildingType
 	public boolean isGapRequired()
 	{
 		return gapRequired;
+	}
+
+	/**
+	 * Returns a visual image of this building type. Note that null may be
+	 * returned.
+	 *
+	 * @return An Image representing this building type
+	 */
+	public Image getImage()
+	{
+		return image;
 	}
 }
