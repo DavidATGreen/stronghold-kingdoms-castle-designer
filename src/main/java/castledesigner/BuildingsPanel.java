@@ -20,11 +20,12 @@
  */
 package castledesigner;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.ButtonGroup;
-import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -65,62 +66,33 @@ public class BuildingsPanel extends JPanel
 		this.setMaximumSize(new Dimension(300, 600));
 		this.setMinimumSize(new Dimension(300, 600));
 		this.setPreferredSize(new Dimension(300, 600));
+
+		setLayout(new BorderLayout());
+
+		JPanel buttonsPanel = new JPanel(new GridLayout(7, 2));
+		buttonsPanel.add(stoneWallButton);
+		buttonsPanel.add(woodenWallButton);
+		buttonsPanel.add(stoneGatehouseButton);
+		buttonsPanel.add(woodenGatehouseButton);
+		buttonsPanel.add(guardHouseButton);
+		buttonsPanel.add(woodenTowerButton);
+		buttonsPanel.add(lookoutTowerButton);
+		buttonsPanel.add(smallTowerButton);
+		buttonsPanel.add(largeTowerButton);
+		buttonsPanel.add(greatTowerButton);
+		buttonsPanel.add(smelterButton);
+		buttonsPanel.add(ballistaTowerButton);
+		buttonsPanel.add(turretButton);
+		buttonsPanel.add(moatButton);
+
+		add(buttonsPanel, BorderLayout.CENTER);
+
+		JPanel tipsPanel = new JPanel(new GridLayout(2, 1));
+		tipsPanel.add(tip1);
+		tipsPanel.add(tip2);
+
+		add(tipsPanel, BorderLayout.SOUTH);
 		
-		GroupLayout layout = new GroupLayout(this);
-		setLayout(layout);
-
-		layout.setAutoCreateGaps(true);
-		layout.setAutoCreateContainerGaps(true);
-
-		layout.setHorizontalGroup(
-			layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-			.addGroup(layout.createSequentialGroup()
-					.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-						.addComponent(stoneWallButton)
-						.addComponent(stoneGatehouseButton)
-						.addComponent(guardHouseButton)
-						.addComponent(lookoutTowerButton)
-						.addComponent(largeTowerButton)
-						.addComponent(smelterButton)
-						.addComponent(turretButton))
-					.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-						.addComponent(woodenWallButton)
-						.addComponent(woodenGatehouseButton)
-						.addComponent(woodenTowerButton)
-						.addComponent(smallTowerButton)
-						.addComponent(greatTowerButton)
-						.addComponent(ballistaTowerButton)
-						.addComponent(moatButton))
-				)
-			.addComponent(tip1)
-			.addComponent(tip2)
-		);
-		layout.setVerticalGroup(
-			layout.createSequentialGroup()
-				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-					.addComponent(stoneWallButton)
-					.addComponent(woodenWallButton))
-				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-					.addComponent(stoneGatehouseButton)
-					.addComponent(woodenGatehouseButton))
-				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-					.addComponent(guardHouseButton)
-					.addComponent(woodenTowerButton))
-				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-					.addComponent(lookoutTowerButton)
-					.addComponent(smallTowerButton))
-				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-					.addComponent(largeTowerButton)
-					.addComponent(greatTowerButton))
-				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-					.addComponent(smelterButton)
-					.addComponent(ballistaTowerButton))
-				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-					.addComponent(turretButton)
-					.addComponent(moatButton))
-				.addComponent(tip1)
-				.addComponent(tip2)
-		);
 		this.repaint();
 	}
 

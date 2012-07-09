@@ -26,7 +26,9 @@ import java.awt.Graphics;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import javax.swing.JPanel;
 
@@ -47,6 +49,9 @@ public class LandGrid extends JPanel
 
 	private static final Color GRASS = new Color(0, 125, 0);
 	private static int lastIdUsed = 0;
+
+	private Set<DesignListener> designListeners = new HashSet<DesignListener>();
+	private List<String> designErrors = new ArrayList<String>();
 
 	private int button = MouseEvent.NOBUTTON;
 
@@ -91,6 +96,16 @@ public class LandGrid extends JPanel
 
 		this.setMinimumSize(new Dimension(tileWidth*numRows + gridOffsetX, tileWidth*numRows + gridOffsetY));
 	}
+
+	public void addDesignListener(DesignListener designListener)
+	{
+		designListeners.add(designListener);
+	}
+
+	public void removeDesignListener(DesignListener designListener)
+	{
+		designListeners.remove(designListener);
+	}
 	
 	void setSelectedBuilding(BuildingType building)
 	{
@@ -117,6 +132,7 @@ public class LandGrid extends JPanel
 					}
 				}
 				LandGrid.this.repaint();
+				updateDesignStats();
 			}
 		}
 		else if (button == MouseEvent.BUTTON3) //else if right click
@@ -141,6 +157,7 @@ public class LandGrid extends JPanel
 					}
 				}
 				LandGrid.this.repaint();
+				updateDesignStats();
 			}
 		}
 	}
@@ -292,6 +309,7 @@ public class LandGrid extends JPanel
 		}
 
 		lastIdUsed = 0;
+		updateDesignStats();
 	}
 
 	public String getGridDataExport()
@@ -398,7 +416,57 @@ public class LandGrid extends JPanel
 				i += 3;
 			}
 		}
+		updateDesignStats();
 		
 		this.repaint();
+	}
+
+	public List<String> getDesignErrors()
+	{
+		return designErrors;
+	}
+
+	private void updateDesignStats()
+	{
+		designErrors.clear();
+
+		int[] buildingCounts = new int[BuildingType.values().length];
+
+		for (int i=0; i<gridData.length; i++)
+		{
+			for (int j=0; j<gridData[i].length; j++)
+			{
+				TileBuilding building = gridData[i][j];
+				if (building != null) buildingCounts[building.getBuildingType().ordinal()]++;
+			}
+		}
+
+		String designError = validateNumberOfBuildings(BuildingType.MOAT, buildingCounts[BuildingType.MOAT.ordinal()], 500);
+		if (designError != null) designErrors.add(designError);
+
+		designError = validateNumberOfBuildings(BuildingType.BALLISTA_TOWER, buildingCounts[BuildingType.BALLISTA_TOWER.ordinal()], 10);
+		if (designError != null) designErrors.add(designError);
+		
+		designError = validateNumberOfBuildings(BuildingType.TURRET, buildingCounts[BuildingType.TURRET.ordinal()], 10);
+		if (designError != null) designErrors.add(designError);
+		
+		designError = validateNumberOfBuildings(BuildingType.GUARD_HOUSE, buildingCounts[BuildingType.GUARD_HOUSE.ordinal()], 38);
+		if (designError != null) designErrors.add(designError);
+
+		for (DesignListener designListener : designListeners)
+		{
+			designListener.designChanged();
+		}
+	}
+
+	private String validateNumberOfBuildings(BuildingType buildingType, int numberOfTiles, int maxNumberOfBuildings)
+	{
+		int numberOfBuildings = numberOfTiles / (buildingType.getDimension().width * buildingType.getDimension().height);
+
+		if (numberOfBuildings > maxNumberOfBuildings)
+		{
+			return "Error: " + numberOfBuildings + " " + buildingType + "s (" + maxNumberOfBuildings + " max)";
+		}
+		else return null;
 	}
 }
