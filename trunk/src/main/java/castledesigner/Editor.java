@@ -20,7 +20,9 @@
  */
 package castledesigner;
 
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
@@ -30,17 +32,20 @@ import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.BoxLayout;
+import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -50,6 +55,9 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.border.EmptyBorder;
 
 /**
  * An application for the game "Stronghold Kingdoms" that helps players design
@@ -60,17 +68,38 @@ import javax.swing.JTextArea;
  */
 public class Editor
 {
-	public static final int versionId = 1;
+	public static final String programVersion = "1.3";
+	private static final int exportVersionId = 1;
 	private static LandPanel landPanel;
 	private static JFrame frame;
 	private static JFileChooser fileChooser;
 	private static File currentFile;
+	private static JPanel errorPanel;
 
 	public static void main( String[] args )
 	{
+		setLookAndFeel();
+		
 		JPanel mainPanel = new JPanel();
 
 		landPanel = new LandPanel();
+		landPanel.addDesignListener(new DesignListener()
+		{
+			public void designChanged()
+			{
+				errorPanel.removeAll();
+				List<String> designErrors = landPanel.getDesignErrors();
+				for (String designError : designErrors)
+				{
+					JLabel designErrorLabel = new JLabel(designError);
+					designErrorLabel.setForeground(Color.red);
+					designErrorLabel.setFont(new Font(designErrorLabel.getFont().getName(),
+						Font.BOLD, designErrorLabel.getFont().getSize()));
+					errorPanel.add(designErrorLabel);
+				}
+				errorPanel.revalidate();
+			}
+		});
 
 		BuildingsPanel buildingsPanel = new BuildingsPanel();
 		buildingsPanel.addPropertyChangeListener(BuildingsPanel.SELECTED_BUILDING, new PropertyChangeListener()
@@ -80,8 +109,19 @@ public class Editor
 				landPanel.setSelectedBuilding((BuildingType)evt.getNewValue());
 			}
 		});
-		
-        	JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, landPanel, buildingsPanel);
+
+		errorPanel = new JPanel();
+		errorPanel.setBorder(new EmptyBorder(5, 10, 0, 0));
+		errorPanel.setLayout(new BoxLayout(errorPanel, BoxLayout.Y_AXIS));
+
+		JPanel rightPanel = new JPanel();
+		GroupLayout layout = new GroupLayout(rightPanel);
+		rightPanel.setLayout(layout);
+
+		layout.setHorizontalGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING).addComponent(buildingsPanel).addComponent(errorPanel));
+		layout.setVerticalGroup(layout.createSequentialGroup().addComponent(buildingsPanel).addComponent(errorPanel));
+
+        	JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, landPanel, rightPanel);
 		
 		mainPanel.add(splitPane);
 
@@ -95,6 +135,34 @@ public class Editor
 		frame.getContentPane().add(mainScrollPane);
 		frame.pack();
 		frame.setVisible(true);
+	}
+
+	/**
+	 * Attempts to set the Look and Feel of the application to the native
+	 * platform.
+	 */
+	private static void setLookAndFeel()
+	{
+		try
+		{
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		}
+		catch (ClassNotFoundException ex)
+		{
+			Logger.getLogger(Editor.class.getName()).log(Level.SEVERE, null, ex);
+		}
+		catch (InstantiationException ex)
+		{
+			Logger.getLogger(Editor.class.getName()).log(Level.SEVERE, null, ex);
+		}
+		catch (IllegalAccessException ex)
+		{
+			Logger.getLogger(Editor.class.getName()).log(Level.SEVERE, null, ex);
+		}
+		catch (UnsupportedLookAndFeelException ex)
+		{
+			Logger.getLogger(Editor.class.getName()).log(Level.SEVERE, null, ex);
+		}
 	}
 
 	/**
@@ -400,7 +468,7 @@ public class Editor
 	private static String generateExportString()
 	{
 		StringBuffer s = new StringBuffer();
-		s.append(versionId);
+		s.append(exportVersionId);
 		s.append(landPanel.getGridDataExport());
 
 		return s.toString();

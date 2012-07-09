@@ -125,4 +125,21 @@ public enum BuildingType
 	{
 		return image;
 	}
+
+	@Override
+	public String toString()
+	{
+		String[] words = name().toLowerCase().split("_");
+
+		StringBuffer name = new StringBuffer();
+		for (String word : words)
+		{
+			if (name.length() > 0) name.append(' ');
+
+			name.append(Character.toUpperCase(word.charAt(0)));
+			if (word.length() > 1) name.append(word.substring(1));
+		}
+
+		return name.toString();
+	}
 }

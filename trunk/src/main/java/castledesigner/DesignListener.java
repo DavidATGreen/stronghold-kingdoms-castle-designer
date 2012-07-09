@@ -20,56 +20,11 @@
  */
 package castledesigner;
 
-import java.util.List;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-
 /**
  *
- * @author David Green
+ * @author David
  */
-public class LandPanel extends JPanel
+public interface DesignListener
 {
-	private LandGrid landGrid;
-
-	public LandPanel()
-	{
-		JScrollPane scrollPane = new javax.swing.JScrollPane();
-		landGrid = new LandGrid();
-
-		scrollPane.setViewportView(landGrid);
-		scrollPane.setPreferredSize(landGrid.getMinimumSize());
-
-		this.add(scrollPane);
-	}
-	
-	public void setSelectedBuilding(BuildingType building)
-	{
-		landGrid.setSelectedBuilding(building);
-	}
-
-	public String getGridDataExport()
-	{
-		return landGrid.getGridDataExport();
-	}
-
-	public void importData(String text)
-	{
-		landGrid.importData(text);
-	}
-
-	public void clearData()
-	{
-		landGrid.clearData();
-	}
-
-	public void addDesignListener(DesignListener designListener)
-	{
-		landGrid.addDesignListener(designListener);
-	}
-
-	public List<String> getDesignErrors()
-	{
-		return landGrid.getDesignErrors();
-	}
+	public void designChanged();
 }

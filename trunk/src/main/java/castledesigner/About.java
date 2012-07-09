@@ -28,6 +28,7 @@ import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JTextField;
 
 /**
  *
@@ -37,7 +38,7 @@ public class About extends JDialog
 {
 	private JButton closeButton;
 	private JLabel programTitle;
-	private JLabel sourceURL;
+	private JTextField projectURL;
 	private JLabel versionTitleLabel;
 	private JLabel versionDateTitleLabel;
 	private JLabel authorTitleLabel;
@@ -55,9 +56,13 @@ public class About extends JDialog
 		versionDateTitleLabel = new JLabel("Date:");
 		authorTitleLabel = new JLabel("Author:");
 		programTitle = new JLabel("Stronghold Kingdoms Castle Designer");
-		sourceURL = new JLabel("http://code.google.com/...");
-		versionLabel = new JLabel(String.valueOf(Editor.versionId));
-		versionDateLabel = new JLabel("5th July 2012");
+		projectURL = new JTextField("http://code.google.com/p/stronghold-kingdoms-castle-designer/");
+		projectURL.setEditable(false);
+		projectURL.setBorder(null);
+		projectURL.setBackground(null);
+		projectURL.setCaretPosition(0);
+		versionLabel = new JLabel(Editor.programVersion);
+		versionDateLabel = new JLabel("9th July 2012");
 		authorLabel = new JLabel("David Green (tempestua)");
 
 		setFonts();
@@ -82,7 +87,7 @@ public class About extends JDialog
 			.addGroup(layout.createParallelGroup(GroupLayout.Alignment.TRAILING).
 				addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 					.addComponent(programTitle)
-					.addComponent(sourceURL)
+					.addComponent(projectURL)
 					.addGroup(layout.createSequentialGroup()
 						.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 							.addComponent(versionTitleLabel)
@@ -100,7 +105,7 @@ public class About extends JDialog
 		layout.setVerticalGroup(
 			layout.createSequentialGroup()
 				.addComponent(programTitle)
-				.addComponent(sourceURL)
+				.addComponent(projectURL)
 				.addGap(15)
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 					.addComponent(versionTitleLabel)
@@ -125,7 +130,7 @@ public class About extends JDialog
 		versionDateTitleLabel.setFont(new Font(versionDateTitleLabel.getFont().getName(), Font.BOLD, versionDateTitleLabel.getFont().getSize()));
 		authorTitleLabel.setFont(new Font(authorTitleLabel.getFont().getName(), Font.BOLD, authorTitleLabel.getFont().getSize()));
 		programTitle.setFont(new Font(programTitle.getFont().getName(), Font.BOLD, programTitle.getFont().getSize()+4));
-		sourceURL.setFont(new Font(sourceURL.getFont().getName(), Font.PLAIN, sourceURL.getFont().getSize()));
+		projectURL.setFont(new Font(projectURL.getFont().getName(), Font.PLAIN, projectURL.getFont().getSize()));
 		versionLabel.setFont(new Font(versionLabel.getFont().getName(), Font.PLAIN, versionLabel.getFont().getSize()));
 		versionDateLabel.setFont(new Font(versionDateLabel.getFont().getName(), Font.PLAIN, versionDateLabel.getFont().getSize()));
 		authorLabel.setFont(new Font(authorLabel.getFont().getName(), Font.PLAIN, authorLabel.getFont().getSize()));
