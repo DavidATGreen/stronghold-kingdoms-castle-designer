@@ -35,12 +35,12 @@ public enum BuildingType
 {
 	//Wood
 	WOODEN_WALL(new Color(150, 75, 0), new Dimension(1, 1), false),
-	WOODEN_GATEHOUSE(new Color(100, 50, 0), new Dimension(3, 3), false),
+	WOODEN_GATEHOUSE(new Color(100, 50, 0), new Dimension(3, 3), true),
 	WOODEN_TOWER(new Color(125, 58, 0), new Dimension(2, 2), false),
 	
 	//Stone
 	STONE_WALL(new Color(230, 230, 230), new Dimension(1, 1), false),
-	STONE_GATEHOUSE(new Color(100, 100, 100), new Dimension(3, 3), false),
+	STONE_GATEHOUSE(new Color(100, 100, 100), new Dimension(3, 3), true),
 	LOOKOUT_TOWER(new Color(200, 200, 200), new Dimension(2, 2), true),
 	SMALL_TOWER(new Color(200, 200, 200), new Dimension(3, 3), true),
 	LARGE_TOWER(new Color(200, 200, 200), new Dimension(4, 4), true),
