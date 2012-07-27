@@ -68,7 +68,7 @@ import javax.swing.border.EmptyBorder;
  */
 public class Editor
 {
-	public static final String programVersion = "1.4";
+	public static final String programVersion = "1.5";
 	private static final int exportVersionId = 1;
 	private static LandPanel landPanel;
 	private static JFrame frame;

@@ -42,9 +42,11 @@ public class About extends JDialog
 	private JLabel versionTitleLabel;
 	private JLabel versionDateTitleLabel;
 	private JLabel authorTitleLabel;
+	private JLabel artistTitleLabel;
 	private JLabel versionLabel;
 	private JLabel versionDateLabel;
 	private JLabel authorLabel;
+	private JLabel artistLabel;
 	
 	public About(Frame owner)
 	{
@@ -55,6 +57,7 @@ public class About extends JDialog
 		versionTitleLabel = new JLabel("Version:");
 		versionDateTitleLabel = new JLabel("Date:");
 		authorTitleLabel = new JLabel("Author:");
+		artistTitleLabel = new JLabel("Artwork By:");
 		programTitle = new JLabel("Stronghold Kingdoms Castle Designer");
 		projectURL = new JTextField("http://code.google.com/p/stronghold-kingdoms-castle-designer/");
 		projectURL.setEditable(false);
@@ -62,8 +65,9 @@ public class About extends JDialog
 		projectURL.setBackground(null);
 		projectURL.setCaretPosition(0);
 		versionLabel = new JLabel(Editor.programVersion);
-		versionDateLabel = new JLabel("10th July 2012");
+		versionDateLabel = new JLabel("27th July 2012");
 		authorLabel = new JLabel("David Green (tempestua)");
+		artistLabel = new JLabel("DavidSpy");
 
 		setFonts();
 
@@ -92,11 +96,13 @@ public class About extends JDialog
 						.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 							.addComponent(versionTitleLabel)
 							.addComponent(versionDateTitleLabel)
-							.addComponent(authorTitleLabel))
+							.addComponent(authorTitleLabel)
+							.addComponent(artistTitleLabel))
 						.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 							.addComponent(versionLabel)
 							.addComponent(versionDateLabel)
-							.addComponent(authorLabel))
+							.addComponent(authorLabel)
+							.addComponent(artistLabel))
 						)
 					)
 				.addComponent(closeButton)
@@ -116,6 +122,9 @@ public class About extends JDialog
 				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 					.addComponent(authorTitleLabel)
 					.addComponent(authorLabel))
+				.addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+					.addComponent(artistTitleLabel)
+					.addComponent(artistLabel))
 				.addGap(10)
 				.addComponent(closeButton)
 		);
@@ -129,10 +138,12 @@ public class About extends JDialog
 		versionTitleLabel.setFont(new Font(versionTitleLabel.getFont().getName(), Font.BOLD, versionTitleLabel.getFont().getSize()));
 		versionDateTitleLabel.setFont(new Font(versionDateTitleLabel.getFont().getName(), Font.BOLD, versionDateTitleLabel.getFont().getSize()));
 		authorTitleLabel.setFont(new Font(authorTitleLabel.getFont().getName(), Font.BOLD, authorTitleLabel.getFont().getSize()));
+		artistTitleLabel.setFont(new Font(artistTitleLabel.getFont().getName(), Font.BOLD, artistTitleLabel.getFont().getSize()));
 		programTitle.setFont(new Font(programTitle.getFont().getName(), Font.BOLD, programTitle.getFont().getSize()+4));
 		projectURL.setFont(new Font(projectURL.getFont().getName(), Font.PLAIN, projectURL.getFont().getSize()));
 		versionLabel.setFont(new Font(versionLabel.getFont().getName(), Font.PLAIN, versionLabel.getFont().getSize()));
 		versionDateLabel.setFont(new Font(versionDateLabel.getFont().getName(), Font.PLAIN, versionDateLabel.getFont().getSize()));
 		authorLabel.setFont(new Font(authorLabel.getFont().getName(), Font.PLAIN, authorLabel.getFont().getSize()));
+		artistLabel.setFont(new Font(artistLabel.getFont().getName(), Font.PLAIN, artistLabel.getFont().getSize()));
 	}
 }
