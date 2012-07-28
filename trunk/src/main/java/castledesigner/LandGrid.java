@@ -23,6 +23,7 @@ package castledesigner;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
@@ -45,7 +46,7 @@ public class LandGrid extends JPanel
 	private TileBuilding[][] gridData = new TileBuilding[numRows][numRows];
 	
 	private String coordinates = "[0, 0]";
-	private BuildingType selectedBuilding = BuildingType.WOODEN_WALL;
+	private BuildingType selectedBuilding = BuildingType.STONE_WALL;
 
 	private static final Color GRASS = new Color(0, 125, 0);
 	private static int lastIdUsed = 0;
@@ -54,6 +55,7 @@ public class LandGrid extends JPanel
 	private List<String> designErrors = new ArrayList<String>();
 
 	private int button = MouseEvent.NOBUTTON;
+	private int[] mouseCoords = {0, 0};
 
 	public LandGrid()
 	{
@@ -63,16 +65,19 @@ public class LandGrid extends JPanel
 		{
 			@Override
 			public void mouseMoved(MouseEvent e) {
-				int[] coords = getCoords(e.getX(), e.getY());
+				mouseCoords = getCoords(e.getX(), e.getY());
 				
-				coordinates = "[" + coords[0] + ", " + coords[1] + "]";
+				coordinates = "[" + mouseCoords[0] + ", " + mouseCoords[1] + "]";
 				LandGrid.this.repaint();
 			}
 			
 			@Override
 			public void mouseDragged(MouseEvent e)
 			{
+				mouseCoords = getCoords(e.getX(), e.getY());
+				coordinates = "[" + mouseCoords[0] + ", " + mouseCoords[1] + "]";
 				changeGridData(e);
+				LandGrid.this.repaint();
 			}
 		});
 		
@@ -122,11 +127,12 @@ public class LandGrid extends JPanel
 			if (isValidCoords(coords))
 			{
 				Dimension dimension = selectedBuilding.getDimension();
+				int[] hotspot = selectedBuilding.getHotspot();
 				int id = getNewId();
 
-				for (int i=coords[0]; i<coords[0]+dimension.getWidth(); i++)
+				for (int i=coords[0] - hotspot[0]; i<coords[0] - hotspot[0] + dimension.getWidth(); i++)
 				{
-					for (int j=coords[1]; j<coords[1]+dimension.getHeight(); j++)
+					for (int j=coords[1] - hotspot[1]; j<coords[1] - hotspot[1] + dimension.getHeight(); j++)
 					{
 						gridData[i][j] = new TileBuilding(selectedBuilding, id);
 					}
@@ -137,7 +143,7 @@ public class LandGrid extends JPanel
 		}
 		else if (button == MouseEvent.BUTTON3) //else if right click
 		{
-			if (fitsInGrid(coords, new Dimension(1, 1)))
+			if (fitsInGrid(coords, new Dimension(1, 1), new int[] {0, 0}))
 			{
 				TileBuilding building = gridData[coords[0]][coords[1]];
 				if (building != null && building.getBuildingType() != BuildingType.KEEP)
@@ -167,32 +173,43 @@ public class LandGrid extends JPanel
 		return ++lastIdUsed;
 	}
 	
+	/**
+	 * Checks that these coords are valid for the selected building. Note
+	 * that these will typically be the center of the building.
+	 *
+	 * @param coords
+	 * @return 
+	 */
 	private boolean isValidCoords(int[] coords)
 	{
 		Dimension dimension = selectedBuilding.getDimension();
+		int[] hotspot = selectedBuilding.getHotspot();
 		
-		if (fitsInGrid(coords, dimension) &&
-			isBuildable(coords, dimension))
+		if (fitsInGrid(coords, dimension, hotspot) &&
+			isBuildable(coords, dimension, hotspot))
 		{
 			if (selectedBuilding.isGapRequired())
 			{
-				return isGapSatisfied(coords, dimension);
+				return isGapSatisfied(coords, dimension, hotspot);
 			}
 			else return true;
 		}
 		else return false;
 	}
 	
-	private boolean fitsInGrid(int[] coords, Dimension dimension)
+	private boolean fitsInGrid(int[] coords, Dimension dimension, int[] hotspot)
 	{
-		return (coords[0] >= 0 && coords[0] <= numRows - dimension.getWidth() && coords[1] >= 0 && coords[1] <= numRows - dimension.getHeight());
+		return (coords[0] - hotspot[0] >= 0 &&
+			coords[0] - hotspot[0] <= numRows - dimension.getWidth() &&
+			coords[1] - hotspot[1] >= 0 &&
+			coords[1] - hotspot[1] <= numRows - dimension.getHeight());
 	}
 	
-	private boolean isBuildable(int[] coords, Dimension dimension)
+	private boolean isBuildable(int[] coords, Dimension dimension, int[] hotspot)
 	{
-		for (int i=coords[0]; i<coords[0]+dimension.getWidth(); i++)
+		for (int i=coords[0] - hotspot[0]; i<coords[0] - hotspot[0] + dimension.getWidth(); i++)
 		{
-			for (int j=coords[1]; j<coords[1]+dimension.getHeight(); j++)
+			for (int j=coords[1] - hotspot[1]; j<coords[1] - hotspot[1] +dimension.getHeight(); j++)
 			{
 				if (gridData[i][j] != null &&
 					gridData[i][j].getBuildingType() != BuildingType.WOODEN_WALL &&
@@ -205,11 +222,11 @@ public class LandGrid extends JPanel
 		return true;
 	}
 	
-	private boolean isGapSatisfied(int[] coords, Dimension dimension)
+	private boolean isGapSatisfied(int[] coords, Dimension dimension, int[] hotspot)
 	{
-		for (int i=coords[0]-1; i<coords[0]+dimension.getWidth()+1; i++)
+		for (int i=coords[0] - hotspot[0] -1; i<coords[0] - hotspot[0] +dimension.getWidth()+1; i++)
 		{
-			for (int j=coords[1]-1; j<coords[1]+dimension.getHeight()+1; j++)
+			for (int j=coords[1] - hotspot[1] - 1; j<coords[1] - hotspot[1] +dimension.getHeight()+1; j++)
 			{
 				if (i >= 0 && i < numRows && j >= 0 && j < numRows)
 				{
@@ -235,7 +252,7 @@ public class LandGrid extends JPanel
 		
 		g.translate(gridOffsetX, gridOffsetY);
 		
-		//Draw the squares content
+		//Draw any plain colours, e.g. grass & keep 
 		for (int i=0; i<numRows; i++)
 		{
 			for (int j=0; j<numRows; j++)
@@ -262,6 +279,7 @@ public class LandGrid extends JPanel
 			g.drawLine(0, i*tileWidth, tileWidth*numRows, i*tileWidth);
 		}
 
+		//Draw the buildings
 		Set<Integer> ids = new HashSet<Integer>();
 		for (int i=0; i<numRows; i++)
 		{
@@ -278,6 +296,15 @@ public class LandGrid extends JPanel
 				}
 			}
 		}
+
+		//Draw the mouse-overlay
+		Image overlay;
+		if (isValidCoords(mouseCoords)) overlay = selectedBuilding.getValidOverlay();
+		else overlay = selectedBuilding.getInvalidOverlay();
+
+		int[] hotspot = selectedBuilding.getHotspot();
+
+		g.drawImage(overlay, (mouseCoords[0] - hotspot[0])*tileWidth+1, (mouseCoords[1] - hotspot[1])*tileWidth+1, null);
 	}
 
 	/**

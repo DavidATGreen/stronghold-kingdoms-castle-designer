@@ -20,11 +20,17 @@
  */
 package castledesigner;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.Toolkit;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 
 /**
  * Enumerations representing the different types of buildings we use.
@@ -59,7 +65,9 @@ public enum BuildingType
 	private final Color colour;
 	private Dimension dimension;
 	private boolean gapRequired;
-	private Image image;
+	private BufferedImage image;
+	private BufferedImage validOverlay;
+	private BufferedImage invalidOverlay;
 	
 	/**
 	 * Constructor
@@ -80,8 +88,43 @@ public enum BuildingType
 		
 		if (url != null)
 		{
-			image = Toolkit.getDefaultToolkit().createImage(url);
+			try
+			{
+				image = ImageIO.read(url);
+				validOverlay = createOverlay(true);
+				invalidOverlay = createOverlay(false);
+			} catch (IOException ex)
+			{
+				Logger.getLogger(BuildingType.class.getName()).log(Level.SEVERE, null, ex);
+			}
 		}
+	}
+
+	private BufferedImage createOverlay(boolean valid)
+	{
+		BufferedImage overlay = new BufferedImage(image.getWidth(null),image.getHeight(null), BufferedImage.TRANSLUCENT);
+		Graphics2D g = overlay.createGraphics();
+		g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
+		g.drawImage(image, 0, 0, null);
+		g.dispose();
+
+		if (valid == false)
+		{
+			for (int i=0; i<overlay.getWidth(); i++)
+			{
+				for (int j=0; j<overlay.getHeight(); j++)
+				{
+					int rgb = overlay.getRGB(i, j) & 0xFFFF4444 | 0xFF0000;
+					overlay.setRGB(i, j, rgb);
+				}
+			}
+		}
+		return overlay;
+	}
+
+	public int[] getHotspot()
+	{
+		return new int[] { (dimension.width - 1) / 2, (dimension.height - 1) / 2 };
 	}
 
 	/**
@@ -124,6 +167,29 @@ public enum BuildingType
 	public Image getImage()
 	{
 		return image;
+	}
+
+	/**
+	 * Returns a visual translucent image of this building type. Note that
+	 * null may be returned.
+	 * 
+	 * @return A translucent BufferedImage representing this building type
+	 */
+	public BufferedImage getValidOverlay()
+	{
+		return validOverlay;
+	}
+
+	/**
+	 * Returns a visual translucent red-tint image of this building type.
+	 * Note that null may be returned.
+	 * 
+	 * @return A translucent red-tinted BufferedImage representing this
+	 * building type
+	 */
+	public BufferedImage getInvalidOverlay()
+	{
+		return invalidOverlay;
 	}
 
 	@Override
