@@ -20,65 +20,14 @@
  */
 package castledesigner;
 
-import java.awt.image.BufferedImage;
-import java.util.List;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-
 /**
  *
  * @author David Green
  */
-public class LandPanel extends JPanel
+public class InvalidBarcodeException extends Exception
 {
-	private LandGrid landGrid;
-
-	public LandPanel()
+	InvalidBarcodeException(String string)
 	{
-		JScrollPane scrollPane = new javax.swing.JScrollPane();
-		landGrid = new LandGrid();
-
-		scrollPane.setViewportView(landGrid);
-		scrollPane.setPreferredSize(landGrid.getMinimumSize());
-
-		this.add(scrollPane);
-	}
-	
-	public void setSelectedBuilding(BuildingType building)
-	{
-		landGrid.setSelectedBuilding(building);
-	}
-
-	public String getGridDataExport()
-	{
-		return landGrid.getGridDataExport();
-	}
-
-	public void importData(String text)
-	{
-		landGrid.importData(text);
-	}
-
-	public void clearData()
-	{
-		landGrid.clearData();
-	}
-
-	public void addDesignListener(DesignListener designListener)
-	{
-		landGrid.addDesignListener(designListener);
-	}
-
-	public List<String> getDesignErrors()
-	{
-		return landGrid.getDesignErrors();
-	}
-
-	public BufferedImage getDesignImage()
-	{
-		BufferedImage image = new BufferedImage(landGrid.getWidth(), landGrid.getHeight(), BufferedImage.TYPE_INT_ARGB);
-		landGrid.paint(image.createGraphics());
-
-		return image;
+		super(string);
 	}
 }
