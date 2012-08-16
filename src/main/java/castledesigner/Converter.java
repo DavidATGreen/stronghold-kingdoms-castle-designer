@@ -43,7 +43,7 @@ public class Converter
 	 */
 	public static char intToAlphaNumeric(int integer)
 	{
-		if (integer < 0 || integer > 60) throw new RuntimeException("Invalid number");
+		if (integer < 0 || integer > 60) throw new IllegalArgumentException("Invalid number: " + integer);
 
 		if (integer < 10) return (char)(integer + '0');
 		else if (integer < 36) return (char)(integer - 10 + 'a');
@@ -62,6 +62,6 @@ public class Converter
 		if (alphaNumeric >= 'A' && alphaNumeric < 'Z') return alphaNumeric - 'A' + 36;
 		else if (alphaNumeric >= 'a' && alphaNumeric <= 'z') return alphaNumeric - 'a' + 10;
 		else if (alphaNumeric >= '0' && alphaNumeric <= '9') return alphaNumeric - '0';
-		else throw new RuntimeException("Unexpected character in import");
+		else throw new IllegalArgumentException("Unexpected character in import: " + alphaNumeric);
 	}
 }

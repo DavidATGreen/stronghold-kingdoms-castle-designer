@@ -339,6 +339,12 @@ public class LandGrid extends JPanel
 		updateDesignStats();
 	}
 
+	/**
+	 * Returns a string full of lovely data representing what buildings
+	 * were placed where.
+	 * 
+	 * @return 
+	 */
 	public String getGridDataExport()
 	{
 		StringBuffer woodenWalls = new StringBuffer();

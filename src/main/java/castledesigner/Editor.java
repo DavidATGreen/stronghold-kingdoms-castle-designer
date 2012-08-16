@@ -27,18 +27,18 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 import javax.swing.BoxLayout;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
@@ -58,6 +58,8 @@ import javax.swing.JTextArea;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  * An application for the game "Stronghold Kingdoms" that helps players design
@@ -68,13 +70,15 @@ import javax.swing.border.EmptyBorder;
  */
 public class Editor
 {
-	public static final String programVersion = "1.7";
+	public static final String programVersion = "1.8";
 	private static final int exportVersionId = 1;
 	private static LandPanel landPanel;
 	private static JFrame frame;
-	private static JFileChooser fileChooser;
+	private static JFileChooser saveFileChooser;
+	private static JFileChooser openFileChooser;
 	private static File currentFile;
 	private static JPanel errorPanel;
+	private static final String FILE_EXTENSION = "png";
 
 	public static void main( String[] args )
 	{
@@ -125,7 +129,46 @@ public class Editor
 		
 		mainPanel.add(splitPane);
 
-		fileChooser = new JFileChooser();
+		saveFileChooser = new JFileChooser();
+		saveFileChooser.setFileFilter(new FileNameExtensionFilter("Stronghold Kingdoms Castle Design", FILE_EXTENSION));
+		saveFileChooser.setAcceptAllFileFilterUsed(false);
+		saveFileChooser.addPropertyChangeListener(JFileChooser.SELECTED_FILE_CHANGED_PROPERTY, new PropertyChangeListener()
+		{
+			public void propertyChange(PropertyChangeEvent evt)
+			{
+				File file = saveFileChooser.getSelectedFile();
+				if (file != null)
+				{
+					String path = file.getAbsolutePath();
+					if (!path.endsWith('.' + FILE_EXTENSION))
+					{
+						File newFile = new File(path + '.' + FILE_EXTENSION);
+						saveFileChooser.setSelectedFile(newFile);
+					}
+				}
+			}
+		});
+
+		openFileChooser = new JFileChooser();
+		
+		//It would be nice to use the following, but for backwards compatibility reasons we can't.
+		//openFileChooser.setFileFilter(new FileNameExtensionFilter("Stronghold Kingdoms Castle Design", FILE_EXTENSION));
+
+		openFileChooser.setFileFilter(new FileFilter()
+		{
+			@Override
+			public boolean accept(File file)
+			{
+				String[] s = file.getName().split("\\.");
+				return file.isDirectory() || s.length <= 1 || s[s.length-1].equals(FILE_EXTENSION);
+			}
+
+			@Override
+			public String getDescription() 
+			{
+				return null;
+			}
+		});
 
 		JScrollPane mainScrollPane = new JScrollPane(mainPanel);
 
@@ -218,20 +261,36 @@ public class Editor
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				int result = fileChooser.showOpenDialog(frame);
+				int result = openFileChooser.showOpenDialog(frame);
 				if (result == JFileChooser.APPROVE_OPTION)
 				{
-					File file = fileChooser.getSelectedFile();
+					File file = openFileChooser.getSelectedFile();
 					BufferedReader in = null;
+					String errorMessage = null;
 					try
 					{
-						in = new BufferedReader(new FileReader(file));
-						importData(in.readLine());
+						String importString = null;
+						if (file.getName().endsWith("." + FILE_EXTENSION))
+						{
+							BufferedImage bufferedImage = ImageIO.read(file);
+							importString = Barcode.extractBarcode(bufferedImage);
+						}
+						else
+						{
+							in = new BufferedReader(new FileReader(file));
+							importString = in.readLine();
+						}
+						importData(importString);
 						currentFile = file;
 					}
 					catch (IOException ex)
 					{
 						Logger.getLogger(Editor.class.getName()).log(Level.SEVERE, null, ex);
+						errorMessage = ex.getLocalizedMessage();
+					}
+					catch (InvalidBarcodeException ex)
+					{
+						errorMessage = "Choosing a random image is naughty!\n" + file.getAbsolutePath() + " is not a valid castle design image.";
 					}
 					finally
 					{
@@ -246,6 +305,10 @@ public class Editor
 								Logger.getLogger(Editor.class.getName()).log(Level.SEVERE, null, ex);
 							}
 						}	
+						if (errorMessage != null)
+						{
+							JOptionPane.showMessageDialog(frame, errorMessage, "Error Reading File", JOptionPane.ERROR_MESSAGE);
+						}
 					}
 				}
 			}
@@ -265,7 +328,10 @@ public class Editor
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				if (currentFile == null) showSaveDialog();
+				if (currentFile == null || !currentFile.getName().endsWith('.' + FILE_EXTENSION))
+				{
+					showSaveDialog();
+				}
 				else
 				{
 					saveFile(currentFile);
@@ -277,10 +343,10 @@ public class Editor
 
 	private static void showSaveDialog()
 	{
-		int result = fileChooser.showSaveDialog(frame);
+		int result = saveFileChooser.showSaveDialog(frame);
 		if (result == JFileChooser.APPROVE_OPTION)
 		{
-			saveFile(fileChooser.getSelectedFile());
+			saveFile(saveFileChooser.getSelectedFile());
 		}
 	}
 
@@ -289,8 +355,10 @@ public class Editor
 		PrintWriter out = null;
 		try
 		{
-			out = new PrintWriter(new BufferedWriter(new FileWriter(file)));
-			out.append(generateExportString());
+			BufferedImage bufferedImage = landPanel.getDesignImage();
+			Barcode.embedBarcode(bufferedImage, generateExportString());
+
+			ImageIO.write(bufferedImage, "png", file);
 			currentFile = file;
 		}
 		catch (IOException ex)
