@@ -43,6 +43,9 @@ public class Barcode
 	private static final int startingX = 50;
 	private static final int endingY = 15;
 
+	private static final int MINIMUM_WIDTH = startingX + 600;
+	private static final int MINIMUM_HEIGHT = endingY + 1;
+
 	private static final int border = 0xff660066;
 
 	/**
@@ -54,9 +57,10 @@ public class Barcode
 	 */
 	public static void embedBarcode(BufferedImage bufferedImage, String barcode)
 	{
-		if (bufferedImage.getWidth() < 650 || bufferedImage.getHeight() <= endingY+1)
+		if (bufferedImage == null) throw new IllegalArgumentException("Null image");
+		if (bufferedImage.getWidth() < MINIMUM_WIDTH || bufferedImage.getHeight() <= MINIMUM_HEIGHT)
 		{
-			throw new RuntimeException("Invalid image size");
+			throw new IllegalArgumentException("Invalid image size");
 		}
 
 		int x = startingX;
@@ -115,7 +119,7 @@ public class Barcode
 	 */
 	public static String extractBarcode(BufferedImage bufferedImage) throws InvalidBarcodeException
 	{
-		if (bufferedImage.getWidth() < 650 || bufferedImage.getHeight() < endingY+1)
+		if (bufferedImage.getWidth() < MINIMUM_WIDTH || bufferedImage.getHeight() < MINIMUM_HEIGHT)
 		{
 			throw new InvalidBarcodeException("Incorrect image size");
 		}

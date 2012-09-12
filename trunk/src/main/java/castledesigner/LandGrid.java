@@ -39,6 +39,7 @@ import javax.swing.JPanel;
  */
 public class LandGrid extends JPanel
 {
+	public static final int exportVersionId = 1;
 	private static final int tileWidth = 14;
 	private static final int numRows = 52;
 	private int gridOffsetX = 20;
@@ -112,9 +113,15 @@ public class LandGrid extends JPanel
 		designListeners.remove(designListener);
 	}
 	
-	void setSelectedBuilding(BuildingType building)
+	public void setSelectedBuilding(BuildingType building)
 	{
+		if (building == null) throw new IllegalArgumentException("Invalid argument (null) to setSelectedBuilding");
 		this.selectedBuilding = building;
+	}
+
+	public BuildingType getSelectedBuilding()
+	{
+		return selectedBuilding;
 	}
 	
 	private void changeGridData(MouseEvent e)
@@ -384,7 +391,15 @@ public class LandGrid extends JPanel
 				}
 			}
 		}
-		return woodenWalls.append(Converter.seperator).append(stoneWalls).append(Converter.seperator).append(structures).toString();
+
+		StringBuffer exportStringBuffer = new StringBuffer();
+		exportStringBuffer.append(exportVersionId);
+		
+		return exportStringBuffer.append(woodenWalls)
+					.append(Converter.seperator)
+					.append(stoneWalls)
+					.append(Converter.seperator)
+					.append(structures).toString();
 	}
 
 	public void importData(String text)

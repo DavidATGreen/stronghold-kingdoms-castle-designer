@@ -71,7 +71,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 public class Editor
 {
 	public static final String programVersion = "1.8";
-	private static final int exportVersionId = 1;
 	private static LandPanel landPanel;
 	private static JFrame frame;
 	private static JFileChooser saveFileChooser;
@@ -535,11 +534,7 @@ public class Editor
 
 	private static String generateExportString()
 	{
-		StringBuffer s = new StringBuffer();
-		s.append(exportVersionId);
-		s.append(landPanel.getGridDataExport());
-
-		return s.toString();
+		return landPanel.getGridDataExport();
 	}
 
 	private static void importData(String text)
