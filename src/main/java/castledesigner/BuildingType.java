@@ -128,6 +128,8 @@ public enum BuildingType
 	}
 
 	/**
+	 * @Deprecated Images should be used instead of colours @see #getImage()
+	 *
 	 * The colour represented by the building
 	 * 
 	 * @return the colour represented by the building
