@@ -55,6 +55,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
+import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.EmptyBorder;
@@ -86,12 +87,12 @@ public class Editor
 		JPanel mainPanel = new JPanel();
 
 		landPanel = new LandPanel();
-		landPanel.addDesignListener(new DesignListener()
+		landPanel.getLandGrid().addDesignListener(new DesignListener()
 		{
 			public void designChanged()
 			{
 				errorPanel.removeAll();
-				List<String> designErrors = landPanel.getDesignErrors();
+				List<String> designErrors = landPanel.getLandGrid().getCastle().getDesignErrors();
 				for (String designError : designErrors)
 				{
 					JLabel designErrorLabel = new JLabel(designError);
@@ -105,13 +106,17 @@ public class Editor
 		});
 
 		BuildingsPanel buildingsPanel = new BuildingsPanel();
+		buildingsPanel.setCastle(landPanel.getLandGrid().getCastle());
 		buildingsPanel.addPropertyChangeListener(BuildingsPanel.SELECTED_BUILDING, new PropertyChangeListener()
 		{
 			public void propertyChange(PropertyChangeEvent evt)
 			{
-				landPanel.setSelectedBuilding((BuildingType)evt.getNewValue());
+				landPanel.getLandGrid().setSelectedBuilding((BuildingType)evt.getNewValue());
 			}
 		});
+		landPanel.getLandGrid().addDesignListener(buildingsPanel);
+
+		TipsPanel tipsPanel = new TipsPanel();
 
 		errorPanel = new JPanel();
 		errorPanel.setBorder(new EmptyBorder(5, 10, 0, 0));
@@ -121,8 +126,17 @@ public class Editor
 		GroupLayout layout = new GroupLayout(rightPanel);
 		rightPanel.setLayout(layout);
 
-		layout.setHorizontalGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING).addComponent(buildingsPanel).addComponent(errorPanel));
-		layout.setVerticalGroup(layout.createSequentialGroup().addComponent(buildingsPanel).addComponent(errorPanel));
+		layout.setHorizontalGroup(
+			layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+				.addComponent(buildingsPanel)
+				.addComponent(errorPanel)
+				.addComponent(tipsPanel));
+		layout.setVerticalGroup(
+			layout.createSequentialGroup()
+				.addComponent(buildingsPanel)
+				.addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+				.addComponent(errorPanel)
+				.addComponent(tipsPanel));
 
         	JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, landPanel, rightPanel);
 		
@@ -503,7 +517,7 @@ public class Editor
 				//We don't want to accidently save over a previous design
 				currentFile = null;
 
-				landPanel.clearData();
+				landPanel.getLandGrid().clearData();
 			}
 		});
 		return exitMenuItem;
@@ -534,13 +548,13 @@ public class Editor
 
 	private static String generateExportString()
 	{
-		return landPanel.getGridDataExport();
+		return landPanel.getLandGrid().getCastle().getGridDataExport();
 	}
 
 	private static void importData(String text)
 	{
 		if (text == null || text.length() == 0) return;
 
-		landPanel.importData(text);
+		landPanel.getLandGrid().importData(text);
 	}
 }

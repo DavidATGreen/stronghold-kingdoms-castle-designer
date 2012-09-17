@@ -195,4 +195,17 @@ public class BuildingTypeTest extends TestCase
 			assertNotNull(buildingType.toString());
 		}
 	}
+
+	/**
+	 * Test of getColour method, of class BuildingType.
+	 */
+	public void testGetColour()
+	{
+		System.out.println("getColour");
+		
+		for (BuildingType buildingType : BuildingType.values())
+		{
+			assertNotNull(buildingType.getColour());
+		}
+	}
 }

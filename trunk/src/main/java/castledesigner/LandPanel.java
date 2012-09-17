@@ -21,11 +21,11 @@
 package castledesigner;
 
 import java.awt.image.BufferedImage;
-import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
 /**
+ * Wrapper class for LandGrid
  *
  * @author David Green
  */
@@ -44,34 +44,9 @@ public class LandPanel extends JPanel
 		this.add(scrollPane);
 	}
 	
-	public void setSelectedBuilding(BuildingType building)
+	public LandGrid getLandGrid()
 	{
-		landGrid.setSelectedBuilding(building);
-	}
-
-	public String getGridDataExport()
-	{
-		return landGrid.getGridDataExport();
-	}
-
-	public void importData(String text)
-	{
-		landGrid.importData(text);
-	}
-
-	public void clearData()
-	{
-		landGrid.clearData();
-	}
-
-	public void addDesignListener(DesignListener designListener)
-	{
-		landGrid.addDesignListener(designListener);
-	}
-
-	public List<String> getDesignErrors()
-	{
-		return landGrid.getDesignErrors();
+		return landGrid;
 	}
 
 	public BufferedImage getDesignImage()
