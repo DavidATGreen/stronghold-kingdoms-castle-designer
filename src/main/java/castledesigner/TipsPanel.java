@@ -20,44 +20,25 @@
  */
 package castledesigner;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.border.TitledBorder;
 
 /**
+ *
  * @author David Green
  */
-public class LandPanelTest extends TestCase
+public class TipsPanel extends JPanel
 {
-	public LandPanelTest(String testName)
+	public TipsPanel()
 	{
-		super(testName);
-	}
+		setLayout(new GridLayout(2, 1));
+		setBorder(new TitledBorder("Tips!"));
+		add(new JLabel("<html>&bull; Drag the mouse for faster placement of buildings</html>"));
+		add(new JLabel("<html>&bull; Use the right mouse button to delete</html>"));
 
-	public static Test suite()
-	{
-		TestSuite suite = new TestSuite(LandPanelTest.class);
-		return suite;
-	}
-	
-	@Override
-	protected void setUp() throws Exception
-	{
-		super.setUp();
-	}
-	
-	@Override
-	protected void tearDown() throws Exception
-	{
-		super.tearDown();
-	}
-
-	/**
-	 * Test of getDesignImage method, of class LandPanel.
-	 */
-	public void testGetDesignImage()
-	{
-		System.out.println("getDesignImage");
-		//Hard to test
+		setMaximumSize(new Dimension(getMaximumSize().width, getMinimumSize().height));
 	}
 }

@@ -41,6 +41,7 @@ public class CastledesignerSuite extends TestCase
 		suite.addTest(TileBuildingTest.suite());
 		suite.addTest(BarcodeTest.suite());
 		suite.addTest(LandGridTest.suite());
+		suite.addTest(CastleTest.suite());
 		suite.addTest(BuildingTypeTest.suite());
 		suite.addTest(EditorTest.suite());
 		suite.addTest(LandPanelTest.suite());

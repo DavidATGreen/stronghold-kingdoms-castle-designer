@@ -30,16 +30,23 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
 
 /**
  *
  * @author David Green
  */
-public class BuildingsPanel extends JPanel
+public class BuildingsPanel extends JPanel implements DesignListener
 {
 	public static final String SELECTED_BUILDING = "SelectedBuilding";
 	private ButtonGroup buildingButtonGroup = new ButtonGroup();
 	private static final Dimension buttonDimension = new Dimension(50, 50);
+	private JLabel moatsLabel;
+	private JLabel ballistaTowersLabel;
+	private JLabel turretsLabel;
+	private JLabel guardHousesLabel;
+	private Castle castle;
 
 	public BuildingsPanel()
 	{
@@ -60,9 +67,6 @@ public class BuildingsPanel extends JPanel
 		JToggleButton smelterButton = createButton("<html>Smelter</html>", BuildingType.SMELTER);
 		JToggleButton moatButton = createButton("<html>Moat</html>", BuildingType.MOAT);
 
-		JLabel tip1 = new JLabel("<html>Tip: Drag the mouse for faster placement of buildings</html>");
-		JLabel tip2 = new JLabel("<html>Tip: Use the right mouse button to delete</html>");
-
 		this.setMaximumSize(new Dimension(300, 600));
 		this.setMinimumSize(new Dimension(300, 600));
 		this.setPreferredSize(new Dimension(300, 600));
@@ -70,6 +74,7 @@ public class BuildingsPanel extends JPanel
 		setLayout(new BorderLayout());
 
 		JPanel buttonsPanel = new JPanel(new GridLayout(7, 2));
+		buttonsPanel.setBorder(new EmptyBorder(4, 4, 4, 4));
 		buttonsPanel.add(stoneWallButton);
 		buttonsPanel.add(woodenWallButton);
 		buttonsPanel.add(stoneGatehouseButton);
@@ -87,12 +92,28 @@ public class BuildingsPanel extends JPanel
 
 		add(buttonsPanel, BorderLayout.CENTER);
 
-		JPanel tipsPanel = new JPanel(new GridLayout(2, 1));
-		tipsPanel.add(tip1);
-		tipsPanel.add(tip2);
+		JPanel quantitiesPanel = new JPanel(new GridLayout(4, 2));
+		quantitiesPanel.setBorder(new TitledBorder("Number of Buildings"));
+		JLabel moatsTitleLabel = new JLabel("Moats");
+		moatsLabel = new JLabel("-/-");
+		JLabel ballistaTowersTitleLabel = new JLabel("Ballista Towers");
+		ballistaTowersLabel = new JLabel("-/-");
+		JLabel turretsTitleLabel = new JLabel("Turrets");
+		turretsLabel = new JLabel("-/-");
+		JLabel guardHousesTitleLabel = new JLabel("Guard Houses");
+		guardHousesLabel = new JLabel("-/-");
 
-		add(tipsPanel, BorderLayout.SOUTH);
+		quantitiesPanel.add(guardHousesTitleLabel);
+		quantitiesPanel.add(guardHousesLabel);
+		quantitiesPanel.add(ballistaTowersTitleLabel);
+		quantitiesPanel.add(ballistaTowersLabel);
+		quantitiesPanel.add(turretsTitleLabel);
+		quantitiesPanel.add(turretsLabel);
+		quantitiesPanel.add(moatsTitleLabel);
+		quantitiesPanel.add(moatsLabel);
 		
+		add(quantitiesPanel, BorderLayout.SOUTH);
+
 		this.repaint();
 	}
 
@@ -118,5 +139,52 @@ public class BuildingsPanel extends JPanel
 		});
 		buildingButtonGroup.add(button);
 		return button;
+	}
+
+	public void setCastle(Castle castle)
+	{
+		this.castle = castle;
+		updateBuildingQuantities();
+	}
+
+	public void designChanged()
+	{
+		updateBuildingQuantities();
+	}
+
+	private void updateBuildingQuantities()
+	{
+		moatsLabel.setText(getBuildingQuantities(BuildingType.MOAT));
+		ballistaTowersLabel.setText(getBuildingQuantities(BuildingType.BALLISTA_TOWER));
+		turretsLabel.setText(getBuildingQuantities(BuildingType.TURRET));
+		guardHousesLabel.setText(getBuildingQuantities(BuildingType.GUARD_HOUSE));
+	}
+
+	private String getBuildingQuantities(BuildingType buildingType)
+	{
+		int numberOfBuildings = 0;
+		int maxNumberOfBuildings = 0;
+		if (castle != null)
+		{
+			numberOfBuildings = castle.getNumberOfBuildings(buildingType);
+			maxNumberOfBuildings = castle.getMaximumNumberOfBuildings(buildingType);
+		}
+
+		boolean exceeded = numberOfBuildings > maxNumberOfBuildings;
+		boolean maximum = numberOfBuildings == maxNumberOfBuildings;
+		
+		StringBuilder s = new StringBuilder();
+		if (exceeded | maximum) s.append("<html>");
+
+		if (exceeded) s.append("<font color=\"red\"><b>");
+		else if (maximum) s.append("<font color=\"#008800\"/>");
+		s.append(numberOfBuildings);
+		if (exceeded) s.append("</b></font>");
+		else if (maximum) s.append("</font>");
+		s.append('/');
+		s.append(maxNumberOfBuildings);
+		if (exceeded | maximum) s.append("</html>");
+
+		return s.toString();
 	}
 }

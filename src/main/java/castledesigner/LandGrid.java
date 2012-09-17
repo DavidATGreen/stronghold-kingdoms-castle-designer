@@ -24,12 +24,11 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
+import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import javax.swing.JPanel;
 
@@ -39,21 +38,18 @@ import javax.swing.JPanel;
  */
 public class LandGrid extends JPanel
 {
-	public static final int exportVersionId = 1;
 	private static final int tileWidth = 14;
-	private static final int numRows = 52;
 	private int gridOffsetX = 20;
 	private int gridOffsetY = 20;
-	private TileBuilding[][] gridData = new TileBuilding[numRows][numRows];
+
+	private Castle castle = new Castle();
 	
 	private String coordinates = "[0, 0]";
 	private BuildingType selectedBuilding = BuildingType.STONE_WALL;
 
 	private static final Color GRASS = new Color(0, 125, 0);
-	private static int lastIdUsed = 0;
 
 	private Set<DesignListener> designListeners = new HashSet<DesignListener>();
-	private List<String> designErrors = new ArrayList<String>();
 
 	private int button = MouseEvent.NOBUTTON;
 	private int[] mouseCoords = {0, 0};
@@ -100,7 +96,9 @@ public class LandGrid extends JPanel
 			}
 		});
 
-		this.setMinimumSize(new Dimension(tileWidth*numRows + gridOffsetX, tileWidth*numRows + gridOffsetY));
+		this.setMinimumSize(new Dimension(
+			tileWidth*Castle.CASTLE_BOUNDRY_LENGTH + gridOffsetX,
+			tileWidth*Castle.CASTLE_BOUNDRY_LENGTH + gridOffsetY));
 	}
 
 	public void addDesignListener(DesignListener designListener)
@@ -126,60 +124,46 @@ public class LandGrid extends JPanel
 	
 	private void changeGridData(MouseEvent e)
 	{
-		int[] coords = getCoords(e.getX(), e.getY());
+		mouseCoords = getCoords(e.getX(), e.getY());
 
 		//If left click
 		if (button == MouseEvent.BUTTON1)
 		{
-			if (isValidCoords(coords))
+			if (isValidCoords(mouseCoords))
 			{
 				Dimension dimension = selectedBuilding.getDimension();
 				int[] hotspot = selectedBuilding.getHotspot();
-				int id = getNewId();
 
-				for (int i=coords[0] - hotspot[0]; i<coords[0] - hotspot[0] + dimension.getWidth(); i++)
+				Set<Point> buildingCoords = new HashSet<Point>();
+
+				for (int i=mouseCoords[0] - hotspot[0]; i<mouseCoords[0] - hotspot[0] + dimension.getWidth(); i++)
 				{
-					for (int j=coords[1] - hotspot[1]; j<coords[1] - hotspot[1] + dimension.getHeight(); j++)
+					for (int j=mouseCoords[1] - hotspot[1]; j<mouseCoords[1] - hotspot[1] + dimension.getHeight(); j++)
 					{
-						gridData[i][j] = new TileBuilding(selectedBuilding, id);
+						buildingCoords.add(new Point(i, j));
 					}
 				}
+				castle.addBuilding(buildingCoords, selectedBuilding);
+				
 				LandGrid.this.repaint();
-				updateDesignStats();
+				notifyDesignListeners();
 			}
 		}
 		else if (button == MouseEvent.BUTTON3) //else if right click
 		{
-			if (fitsInGrid(coords, new Dimension(1, 1), new int[] {0, 0}))
+			if (fitsInGrid(mouseCoords, new Dimension(1, 1), new int[] {0, 0}))
 			{
-				TileBuilding building = gridData[coords[0]][coords[1]];
+				TileBuilding building = castle.getGridData(mouseCoords[0], mouseCoords[1]);
 				if (building != null && building.getBuildingType() != BuildingType.KEEP)
 				{
-					int id = building.getBuildingId();
-
-					for (int i=0; i<numRows; i++)
-					{
-						for (int j=0; j<numRows; j++)
-						{
-							if (gridData[i][j] != null &&
-								gridData[i][j].getBuildingId() == id)
-							{
-								gridData[i][j] = null;
-							}
-						}
-					}
+					castle.removeBuilding(building);
 				}
 				LandGrid.this.repaint();
-				updateDesignStats();
+				notifyDesignListeners();
 			}
 		}
 	}
 
-	private int getNewId()
-	{
-		return ++lastIdUsed;
-	}
-	
 	/**
 	 * Checks that these coords are valid for the selected building. Note
 	 * that these will typically be the center of the building.
@@ -207,9 +191,9 @@ public class LandGrid extends JPanel
 	private boolean fitsInGrid(int[] coords, Dimension dimension, int[] hotspot)
 	{
 		return (coords[0] - hotspot[0] >= 0 &&
-			coords[0] - hotspot[0] <= numRows - dimension.getWidth() &&
+			coords[0] - hotspot[0] <= Castle.CASTLE_BOUNDRY_LENGTH - dimension.getWidth() &&
 			coords[1] - hotspot[1] >= 0 &&
-			coords[1] - hotspot[1] <= numRows - dimension.getHeight());
+			coords[1] - hotspot[1] <= Castle.CASTLE_BOUNDRY_LENGTH - dimension.getHeight());
 	}
 	
 	private boolean isBuildable(int[] coords, Dimension dimension, int[] hotspot)
@@ -218,9 +202,11 @@ public class LandGrid extends JPanel
 		{
 			for (int j=coords[1] - hotspot[1]; j<coords[1] - hotspot[1] +dimension.getHeight(); j++)
 			{
-				if (gridData[i][j] != null &&
-					gridData[i][j].getBuildingType() != BuildingType.WOODEN_WALL &&
-					gridData[i][j].getBuildingType() != BuildingType.STONE_WALL)
+				TileBuilding tileBuilding = castle.getGridData(i, j);
+				
+				if (tileBuilding != null &&
+					tileBuilding.getBuildingType() != BuildingType.WOODEN_WALL &&
+					tileBuilding.getBuildingType() != BuildingType.STONE_WALL)
 				{
 					return false;
 				}
@@ -235,9 +221,11 @@ public class LandGrid extends JPanel
 		{
 			for (int j=coords[1] - hotspot[1] - 1; j<coords[1] - hotspot[1] +dimension.getHeight()+1; j++)
 			{
-				if (i >= 0 && i < numRows && j >= 0 && j < numRows)
+				if (i >= 0 && i < Castle.CASTLE_BOUNDRY_LENGTH && j >= 0 && j < Castle.CASTLE_BOUNDRY_LENGTH)
 				{
-					if (gridData[i][j] != null && gridData[i][j].getBuildingType().isGapRequired()) return false;
+					TileBuilding tileBuilding = castle.getGridData(i, j);
+
+					if (tileBuilding != null && tileBuilding.getBuildingType().isGapRequired()) return false;
 				}
 			}
 		}
@@ -260,13 +248,16 @@ public class LandGrid extends JPanel
 		g.translate(gridOffsetX, gridOffsetY);
 		
 		//Draw any plain colours, e.g. grass & keep 
-		for (int i=0; i<numRows; i++)
+		for (int i=0; i<Castle.CASTLE_BOUNDRY_LENGTH; i++)
 		{
-			for (int j=0; j<numRows; j++)
+			for (int j=0; j<Castle.CASTLE_BOUNDRY_LENGTH; j++)
 			{
-				if (gridData[i][j] != null && gridData[i][j].getBuildingType().getImage() == null)
+				TileBuilding tileBuilding = castle.getGridData(i, j);
+				
+				if (tileBuilding != null && tileBuilding.getBuildingType().getImage() == null)
 				{
-					g.setColor(gridData[i][j].getBuildingType().getColour());
+					//This is unlikely to be called now since everything has an image
+					g.setColor(tileBuilding.getBuildingType().getColour());
 				}
 				else
 				{
@@ -280,25 +271,26 @@ public class LandGrid extends JPanel
 		
 		//Draw the grid
 		g.setColor(Color.black);
-		for (int i=0; i<numRows+1; i++)
+		for (int i=0; i<Castle.CASTLE_BOUNDRY_LENGTH+1; i++)
 		{
-			g.drawLine(i*tileWidth, 0, i*tileWidth, tileWidth*numRows);
-			g.drawLine(0, i*tileWidth, tileWidth*numRows, i*tileWidth);
+			g.drawLine(i*tileWidth, 0, i*tileWidth, tileWidth*Castle.CASTLE_BOUNDRY_LENGTH);
+			g.drawLine(0, i*tileWidth, tileWidth*Castle.CASTLE_BOUNDRY_LENGTH, i*tileWidth);
 		}
 
 		//Draw the buildings
 		Set<Integer> ids = new HashSet<Integer>();
-		for (int i=0; i<numRows; i++)
+		for (int i=0; i<Castle.CASTLE_BOUNDRY_LENGTH; i++)
 		{
-			for (int j=0; j<numRows; j++)
+			for (int j=0; j<Castle.CASTLE_BOUNDRY_LENGTH; j++)
 			{
-				if (gridData[i][j] != null)
+				TileBuilding tileBuilding = castle.getGridData(i, j);
+				if (tileBuilding != null)
 				{
-					if ((gridData[i][j].getBuildingType().getImage() != null) &&
-						!ids.contains(gridData[i][j].getBuildingId()))
+					if ((tileBuilding.getBuildingType().getImage() != null) &&
+						!ids.contains(tileBuilding.getBuildingId()))
 					{
-						ids.add(gridData[i][j].getBuildingId());
-						g.drawImage(gridData[i][j].getBuildingType().getImage(), i*tileWidth+1, j*tileWidth+1, null);
+						ids.add(tileBuilding.getBuildingId());
+						g.drawImage(tileBuilding.getBuildingType().getImage(), i*tileWidth+1, j*tileWidth+1, null);
 					}
 				}
 			}
@@ -326,195 +318,28 @@ public class LandGrid extends JPanel
 
 	private void resetGridData()
 	{
-		for (int i=0; i<gridData.length; i++)
-		{
-			for (int j=0; j<gridData[i].length; j++)
-			{
-				gridData[i][j] = null;
-			}
-		}
-			
-		for (int i=22; i<22 + BuildingType.KEEP.getDimension().getWidth(); i++)
-		{
-			for (int j=22; j<22 + BuildingType.KEEP.getDimension().getHeight(); j++)
-			{
-				gridData[i][j] = new TileBuilding(BuildingType.KEEP, 0);
-			}
-		}
-
-		lastIdUsed = 0;
-		updateDesignStats();
-	}
-
-	/**
-	 * Returns a string full of lovely data representing what buildings
-	 * were placed where.
-	 * 
-	 * @return 
-	 */
-	public String getGridDataExport()
-	{
-		StringBuffer woodenWalls = new StringBuffer();
-		StringBuffer stoneWalls = new StringBuffer();
-		StringBuffer structures = new StringBuffer();
-
-		Set<Integer> ids = new HashSet<Integer>();
-
-		for (int i=0; i<gridData.length; i++)
-		{
-			for (int j=0; j<gridData[i].length; j++)
-			{
-				TileBuilding building = gridData[i][j];
-
-				if (building != null)
-				{
-					if (building.getBuildingType() == BuildingType.WOODEN_WALL)
-					{
-						woodenWalls.append(Converter.intToAlphaNumeric(i));
-						woodenWalls.append(Converter.intToAlphaNumeric(j));
-					}
-					else if (building.getBuildingType() == BuildingType.STONE_WALL)
-					{
-						stoneWalls.append(Converter.intToAlphaNumeric(i));
-						stoneWalls.append(Converter.intToAlphaNumeric(j));
-					}
-					else
-					{
-						if (!ids.contains(building.getBuildingId()))
-						{
-							ids.add(building.getBuildingId());
-							structures.append(Converter.intToAlphaNumeric(building.getBuildingType().ordinal()));
-							structures.append(Converter.intToAlphaNumeric(i));
-							structures.append(Converter.intToAlphaNumeric(j));
-						}
-					}
-				}
-			}
-		}
-
-		StringBuffer exportStringBuffer = new StringBuffer();
-		exportStringBuffer.append(exportVersionId);
-		
-		return exportStringBuffer.append(woodenWalls)
-					.append(Converter.seperator)
-					.append(stoneWalls)
-					.append(Converter.seperator)
-					.append(structures).toString();
+		castle.resetGridData();
+		notifyDesignListeners();
 	}
 
 	public void importData(String text)
 	{
-		int version = text.charAt(0);
-
-		resetGridData();
-
-		String data = text.substring(1);
-
-		if (data == null) return;
-		String[] dataStrings = data.split(String.valueOf(Converter.seperator));
-
-		if (dataStrings[0] != null)
-		{
-			int i=0;
-			while (i < dataStrings[0].length())
-			{
-				int x = Converter.alphaNumericToInt(dataStrings[0].charAt(i));
-				int y = Converter.alphaNumericToInt(dataStrings[0].charAt(i+1));
-				
-				gridData[x][y] = new TileBuilding(BuildingType.WOODEN_WALL, getNewId());
-
-				i += 2;
-			}
-		}
-		
-		if (dataStrings[1] != null)
-		{
-			int i=0;
-			while (i < dataStrings[1].length())
-			{
-				int x = Converter.alphaNumericToInt(dataStrings[1].charAt(i));
-				int y = Converter.alphaNumericToInt(dataStrings[1].charAt(i+1));
-				
-				gridData[x][y] = new TileBuilding(BuildingType.STONE_WALL, getNewId());
-
-				i += 2;
-			}
-		}
-		
-		if (dataStrings[2] != null)
-		{
-			int i=0;
-			while (i < dataStrings[2].length())
-			{
-				int ordinal = Converter.alphaNumericToInt(dataStrings[2].charAt(i));
-				int x = Converter.alphaNumericToInt(dataStrings[2].charAt(i+1));
-				int y = Converter.alphaNumericToInt(dataStrings[2].charAt(i+2));
-				
-				BuildingType buildingType = BuildingType.values()[ordinal];
-				int id = getNewId();
-
-				for (int k=x; k<x+buildingType.getDimension().getWidth(); k++)
-				{
-					for (int l=y; l<y+buildingType.getDimension().getHeight(); l++)
-					{
-						gridData[k][l] = new TileBuilding(buildingType, id);
-					}
-				}
-
-				i += 3;
-			}
-		}
-		updateDesignStats();
+		castle.importData(text);
+		notifyDesignListeners();
 		
 		this.repaint();
 	}
 
-	public List<String> getDesignErrors()
+	private void notifyDesignListeners()
 	{
-		return designErrors;
-	}
-
-	private void updateDesignStats()
-	{
-		designErrors.clear();
-
-		int[] buildingCounts = new int[BuildingType.values().length];
-
-		for (int i=0; i<gridData.length; i++)
-		{
-			for (int j=0; j<gridData[i].length; j++)
-			{
-				TileBuilding building = gridData[i][j];
-				if (building != null) buildingCounts[building.getBuildingType().ordinal()]++;
-			}
-		}
-
-		String designError = validateNumberOfBuildings(BuildingType.MOAT, buildingCounts[BuildingType.MOAT.ordinal()], 500);
-		if (designError != null) designErrors.add(designError);
-
-		designError = validateNumberOfBuildings(BuildingType.BALLISTA_TOWER, buildingCounts[BuildingType.BALLISTA_TOWER.ordinal()], 10);
-		if (designError != null) designErrors.add(designError);
-		
-		designError = validateNumberOfBuildings(BuildingType.TURRET, buildingCounts[BuildingType.TURRET.ordinal()], 10);
-		if (designError != null) designErrors.add(designError);
-		
-		designError = validateNumberOfBuildings(BuildingType.GUARD_HOUSE, buildingCounts[BuildingType.GUARD_HOUSE.ordinal()], 38);
-		if (designError != null) designErrors.add(designError);
-
 		for (DesignListener designListener : designListeners)
 		{
 			designListener.designChanged();
 		}
 	}
 
-	private String validateNumberOfBuildings(BuildingType buildingType, int numberOfTiles, int maxNumberOfBuildings)
+	public Castle getCastle()
 	{
-		int numberOfBuildings = numberOfTiles / (buildingType.getDimension().width * buildingType.getDimension().height);
-
-		if (numberOfBuildings > maxNumberOfBuildings)
-		{
-			return "Error: " + numberOfBuildings + " " + buildingType + "s (" + maxNumberOfBuildings + " max)";
-		}
-		else return null;
+		return castle;
 	}
 }

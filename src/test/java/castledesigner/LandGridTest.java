@@ -261,61 +261,30 @@ public class LandGridTest extends TestCase
 		System.out.println("clearData");
 
 		LandGrid instance = new LandGrid();
-		
-		String clearExportString = instance.getGridDataExport();
 
-		try
+		DesignListener designListener = new DesignListener()
 		{
-			for (String importString : LayoutUtils.getImportStrings())
+			public void designChanged()
 			{
-				instance.importData(importString);
-
-				instance.clearData();
-
-				assertEquals(clearExportString, instance.getGridDataExport());
+				changed = true;
 			}
-		}
-		catch (InvalidBarcodeException ex)
-		{
-			Logger.getLogger(LandGridTest.class.getName()).log(Level.SEVERE, null, ex);
-			fail("Error reading resources layout");
-		}
-		catch (FileNotFoundException ex)
-		{
-			Logger.getLogger(LandGridTest.class.getName()).log(Level.SEVERE, null, ex);
-			fail("Error reading resources layout");
-		}
-		catch (IOException ex)
-		{
-			Logger.getLogger(LandGridTest.class.getName()).log(Level.SEVERE, null, ex);
-			fail("Error reading resources layout");
-		}
-	}
-
-	/**
-	 * Test of getGridDataExport method, of class LandGrid.
-	 */
-	public void testGetGridDataExport()
-	{
-		System.out.println("getGridDataExport");
-
-		LandGrid instance = new LandGrid();
+		};
+		instance.addDesignListener(designListener);
 		
 		try
 		{
 			for (String importString : LayoutUtils.getImportStrings())
 			{
 				instance.importData(importString);
-				String exportString = instance.getGridDataExport();
-
+				changed = false;
 				instance.clearData();
-				instance.importData(exportString);
 
 				/*
-				 * This test shows that what was exported can
-				 * be imported to give the same export result.
+				 * We only need to test that a design listener
+				 * is triggered. The actual reset of data is
+				 * tested in the CastleTest class.
 				 */
-				assertEquals(exportString, instance.getGridDataExport());
+				assertTrue(changed);
 			}
 		}
 		catch (InvalidBarcodeException ex)
@@ -333,35 +302,6 @@ public class LandGridTest extends TestCase
 			Logger.getLogger(LandGridTest.class.getName()).log(Level.SEVERE, null, ex);
 			fail("Error reading resources layout");
 		}
-
-		boolean suitableTestFound = false;
-		try
-		{
-			for (String importString : LayoutUtils.getImportStrings())
-			{
-				if (Character.getNumericValue(importString.charAt(0)) == LandGrid.exportVersionId)
-				{
-					suitableTestFound = true;
-					
-					instance.clearData();
-					instance.importData(importString);
-
-					assertEquals(importString, instance.getGridDataExport());
-				}
-			}
-		}
-		catch (IOException ex)
-		{
-			Logger.getLogger(LandGridTest.class.getName()).log(Level.SEVERE, null, ex);
-			fail("Error reading resources layout");
-		}
-		catch (InvalidBarcodeException ex)
-		{
-			Logger.getLogger(LandGridTest.class.getName()).log(Level.SEVERE, null, ex);
-			fail("Error reading resources layout");
-		}
-
-		if (suitableTestFound == false) fail("No designs found that use the new export version ID");
 	}
 
 	/**
@@ -372,20 +312,29 @@ public class LandGridTest extends TestCase
 		System.out.println("importData");
 
 		LandGrid instance = new LandGrid();
-		/**
-		 * It's difficult to test this without messing around with
-		 * reflection. I'll just accept a limited test for now.
-		 */
+
+		DesignListener designListener = new DesignListener()
+		{
+			public void designChanged()
+			{
+				changed = true;
+			}
+		};
+		instance.addDesignListener(designListener);
+
 		try
 		{
 			for (String importString : LayoutUtils.getImportStrings())
 			{
+				changed = false;
 				instance.importData(importString);
 
-				if (Character.getNumericValue(importString.charAt(0)) == LandGrid.exportVersionId)
-				{
-					assertEquals(importString, instance.getGridDataExport());
-				}
+				/*
+				 * We only need to test that a design listener
+				 * is triggered. The actual import is tested
+				 * in the CastleTest class.
+				 */
+				assertTrue(changed);
 			}
 		}
 		catch (IOException ex)
@@ -401,32 +350,14 @@ public class LandGridTest extends TestCase
 	}
 
 	/**
-	 * Test of getDesignErrors method, of class LandGrid.
+	 * Test of getCastle method, of class LandGrid.
 	 */
-	public void testGetDesignErrors()
+	public void testGetCastle()
 	{
-		System.out.println("getDesignErrors");
+		System.out.println("getCastle");
 
 		LandGrid instance = new LandGrid();
-		try
-		{
-			String importString = LayoutUtils.getImportString("waterworld");
-			instance.importData(importString);
-			assertEquals(1, instance.getDesignErrors().size());
-
-			importString = LayoutUtils.getImportString("typical");
-			instance.importData(importString);
-			assertTrue(instance.getDesignErrors().isEmpty());
-		}
-		catch (IOException ex)
-		{
-			Logger.getLogger(LandGridTest.class.getName()).log(Level.SEVERE, null, ex);
-			fail("Error reading resources layout");
-		}
-		catch (InvalidBarcodeException ex)
-		{
-			Logger.getLogger(LandGridTest.class.getName()).log(Level.SEVERE, null, ex);
-			fail("Error reading resources layout");
-		}
+		
+		assertNotNull(instance.getCastle());
 	}
 }
