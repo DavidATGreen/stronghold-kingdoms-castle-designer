@@ -268,17 +268,15 @@ public class Castle
 			buildingQuantities.put(buildingType, numberOfBuildings);
 		}
 
-		String designError = validateNumberOfBuildings(BuildingType.MOAT, buildingCounts[BuildingType.MOAT.ordinal()], 500);
-		if (designError != null) designErrors.add(designError);
+		for (BuildingType buildingType : maxBuildings.keySet())
+		{
+			String designError = validateNumberOfBuildings(
+				buildingType,
+				buildingCounts[buildingType.ordinal()],
+				maxBuildings.get(buildingType));
 
-		designError = validateNumberOfBuildings(BuildingType.BALLISTA_TOWER, buildingCounts[BuildingType.BALLISTA_TOWER.ordinal()], 10);
-		if (designError != null) designErrors.add(designError);
-		
-		designError = validateNumberOfBuildings(BuildingType.TURRET, buildingCounts[BuildingType.TURRET.ordinal()], 10);
-		if (designError != null) designErrors.add(designError);
-		
-		designError = validateNumberOfBuildings(BuildingType.GUARD_HOUSE, buildingCounts[BuildingType.GUARD_HOUSE.ordinal()], 38);
-		if (designError != null) designErrors.add(designError);
+			if (designError != null) designErrors.add(designError);
+		}
 	}
 
 	public int getNumberOfBuildings(BuildingType buildingType)
