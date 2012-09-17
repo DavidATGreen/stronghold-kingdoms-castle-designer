@@ -65,7 +65,7 @@ public class About extends JDialog
 		projectURL.setBackground(null);
 		projectURL.setCaretPosition(0);
 		versionLabel = new JLabel(Editor.programVersion);
-		versionDateLabel = new JLabel("16th August 2012");
+		versionDateLabel = new JLabel("17th September 2012");
 		authorLabel = new JLabel("David Green (tempestua)");
 		artistLabel = new JLabel("DavidSpy");
 
