@@ -195,7 +195,6 @@ public class Castle
 		if (data == null) return;
 		String[] dataStrings = data.split(String.valueOf(Converter.seperator));
 
-		System.out.println("DataSTrings.length = " + dataStrings.length);
 		if (dataStrings.length > 0 && dataStrings[0] != null) importSingleTiles(BuildingType.WOODEN_WALL, dataStrings[0]);
 		if (dataStrings.length > 1 && dataStrings[1] != null) importSingleTiles(BuildingType.STONE_WALL, dataStrings[1]);
 		
