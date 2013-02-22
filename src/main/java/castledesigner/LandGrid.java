@@ -322,7 +322,7 @@ public class LandGrid extends JPanel
 		notifyDesignListeners();
 	}
 
-	public void importData(String text)
+	public void importData(String text) throws UnsupportedVersionException
 	{
 		castle.importData(text);
 		notifyDesignListeners();

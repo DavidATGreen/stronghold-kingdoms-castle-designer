@@ -74,6 +74,7 @@ public class BarcodeTest extends TestCase
 		for (File file : LayoutUtils.getImageFiles())
 		{
 			BufferedImage bufferedImage = ImageIO.read(file);
+			System.out.println("Testing image " + file.getName());
 			String result = Barcode.extractBarcode(bufferedImage);
 
 			String alphanumericTextFile = file.getAbsolutePath().replaceAll(".png$", "");

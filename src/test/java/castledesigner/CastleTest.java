@@ -138,6 +138,10 @@ public class CastleTest extends TestCase
 		{
 			Logger.getLogger(CastleTest.class.getName()).log(Level.SEVERE, null, ex);
 		}
+		catch (UnsupportedVersionException ex)
+		{
+			Logger.getLogger(CastleTest.class.getName()).log(Level.SEVERE, null, ex);
+		}
 		
 		try
 		{
@@ -170,10 +174,15 @@ public class CastleTest extends TestCase
 				instance.resetGridData();
 
 		System.out.println("a = " + instance.getGridDataExport());
-				assertEquals(clearExportString, instance.getGridDataExport());
+				assertEquals(clearExportString.substring(1), instance.getGridDataExport().substring(1));
 			}
 		}
 		catch (InvalidBarcodeException ex)
+		{
+			Logger.getLogger(CastleTest.class.getName()).log(Level.SEVERE, null, ex);
+			fail("Error reading resources layout");
+		}
+		catch (UnsupportedVersionException ex)
 		{
 			Logger.getLogger(CastleTest.class.getName()).log(Level.SEVERE, null, ex);
 			fail("Error reading resources layout");
@@ -209,14 +218,22 @@ public class CastleTest extends TestCase
 				instance.resetGridData();
 				instance.importData(exportString);
 
+				System.out.println("importString = " + importString);
+				System.out.println("exportString = " + exportString);
+				System.out.println("newExportString = " + instance.getGridDataExport());
 				/*
 				 * This test shows that what was exported can
 				 * be imported to give the same export result.
 				 */
-				assertEquals(exportString, instance.getGridDataExport());
+				assertEquals(exportString.substring(1), instance.getGridDataExport().substring(1));
 			}
 		}
 		catch (InvalidBarcodeException ex)
+		{
+			Logger.getLogger(CastleTest.class.getName()).log(Level.SEVERE, null, ex);
+			fail("Error reading resources layout");
+		}
+		catch (UnsupportedVersionException ex)
 		{
 			Logger.getLogger(CastleTest.class.getName()).log(Level.SEVERE, null, ex);
 			fail("Error reading resources layout");
@@ -258,6 +275,11 @@ public class CastleTest extends TestCase
 			Logger.getLogger(CastleTest.class.getName()).log(Level.SEVERE, null, ex);
 			fail("Error reading resources layout");
 		}
+		catch (UnsupportedVersionException ex)
+		{
+			Logger.getLogger(CastleTest.class.getName()).log(Level.SEVERE, null, ex);
+			fail("Error reading resources layout");
+		}
 
 		if (suitableTestFound == false) fail("No designs found that use the new export version ID");
 	}
@@ -283,7 +305,7 @@ public class CastleTest extends TestCase
 
 				if (Character.getNumericValue(importString.charAt(0)) == Castle.exportVersionId)
 				{
-					assertEquals(importString, instance.getGridDataExport());
+					assertEquals(importString.substring(1), instance.getGridDataExport().substring(1));
 				}
 			}
 		}
@@ -293,6 +315,11 @@ public class CastleTest extends TestCase
 			fail("Error reading resources layout");
 		}
 		catch (InvalidBarcodeException ex)
+		{
+			Logger.getLogger(CastleTest.class.getName()).log(Level.SEVERE, null, ex);
+			fail("Error reading resources layout");
+		}
+		catch (UnsupportedVersionException ex)
 		{
 			Logger.getLogger(CastleTest.class.getName()).log(Level.SEVERE, null, ex);
 			fail("Error reading resources layout");
@@ -366,6 +393,11 @@ public class CastleTest extends TestCase
 			fail("Error reading resources layout");
 		}
 		catch (InvalidBarcodeException ex)
+		{
+			Logger.getLogger(CastleTest.class.getName()).log(Level.SEVERE, null, ex);
+			fail("Error reading resources layout");
+		}
+		catch (UnsupportedVersionException ex)
 		{
 			Logger.getLogger(CastleTest.class.getName()).log(Level.SEVERE, null, ex);
 			fail("Error reading resources layout");

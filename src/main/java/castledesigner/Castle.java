@@ -35,7 +35,7 @@ import java.util.Set;
 public class Castle
 {
 	public static final int CASTLE_BOUNDRY_LENGTH = 52;
-	public static final int exportVersionId = 1;
+	public static final int exportVersionId = 2;
 
 	private Map<BuildingType, Integer> buildingQuantities = new HashMap<BuildingType, Integer>();
 	private Map<BuildingType, Integer> maxBuildings;
@@ -115,6 +115,8 @@ public class Castle
 	{
 		StringBuffer woodenWalls = new StringBuffer();
 		StringBuffer stoneWalls = new StringBuffer();
+		StringBuffer moats = new StringBuffer();
+		StringBuffer killingPits = new StringBuffer();
 		StringBuffer structures = new StringBuffer();
 
 		Set<Integer> ids = new HashSet<Integer>();
@@ -137,6 +139,16 @@ public class Castle
 						stoneWalls.append(Converter.intToAlphaNumeric(i));
 						stoneWalls.append(Converter.intToAlphaNumeric(j));
 					}
+					else if (building.getBuildingType() == BuildingType.MOAT)
+					{
+						moats.append(Converter.intToAlphaNumeric(i));
+						moats.append(Converter.intToAlphaNumeric(j));
+					}
+					else if (building.getBuildingType() == BuildingType.KILLING_PIT)
+					{
+						killingPits.append(Converter.intToAlphaNumeric(i));
+						killingPits.append(Converter.intToAlphaNumeric(j));
+					}
 					else
 					{
 						if (!ids.contains(building.getBuildingId()))
@@ -158,7 +170,11 @@ public class Castle
 					.append(Converter.seperator)
 					.append(stoneWalls)
 					.append(Converter.seperator)
-					.append(structures).toString();
+					.append(structures)
+					.append(Converter.seperator)
+					.append(moats)
+					.append(Converter.seperator)
+					.append(killingPits).toString();
 	}
 
 	private int getNewId()
@@ -166,46 +182,22 @@ public class Castle
 		return ++lastIdUsed;
 	}
 	
-	public void importData(String text)
+	public void importData(String text) throws UnsupportedVersionException
 	{
-		int version = text.charAt(0);
+		int version = Character.getNumericValue(text.charAt(0));
 
 		resetGridData();
 
 		String data = text.substring(1);
-
+	
 		if (data == null) return;
 		String[] dataStrings = data.split(String.valueOf(Converter.seperator));
 
-		if (dataStrings[0] != null)
-		{
-			int i=0;
-			while (i < dataStrings[0].length())
-			{
-				int x = Converter.alphaNumericToInt(dataStrings[0].charAt(i));
-				int y = Converter.alphaNumericToInt(dataStrings[0].charAt(i+1));
-				
-				gridData[x][y] = new TileBuilding(BuildingType.WOODEN_WALL, getNewId());
-
-				i += 2;
-			}
-		}
+		System.out.println("DataSTrings.length = " + dataStrings.length);
+		if (dataStrings.length > 0 && dataStrings[0] != null) importSingleTiles(BuildingType.WOODEN_WALL, dataStrings[0]);
+		if (dataStrings.length > 1 && dataStrings[1] != null) importSingleTiles(BuildingType.STONE_WALL, dataStrings[1]);
 		
-		if (dataStrings[1] != null)
-		{
-			int i=0;
-			while (i < dataStrings[1].length())
-			{
-				int x = Converter.alphaNumericToInt(dataStrings[1].charAt(i));
-				int y = Converter.alphaNumericToInt(dataStrings[1].charAt(i+1));
-				
-				gridData[x][y] = new TileBuilding(BuildingType.STONE_WALL, getNewId());
-
-				i += 2;
-			}
-		}
-		
-		if (dataStrings[2] != null)
+		if (dataStrings.length > 2 && dataStrings[2] != null)
 		{
 			int i=0;
 			while (i < dataStrings[2].length())
@@ -228,9 +220,27 @@ public class Castle
 				i += 3;
 			}
 		}
+		if (dataStrings.length > 3 && dataStrings[3] != null) importSingleTiles(BuildingType.MOAT, dataStrings[3]);
+		if (dataStrings.length > 4 && dataStrings[4] != null) importSingleTiles(BuildingType.KILLING_PIT, dataStrings[4]);
 		updateDesignStats();
-	}
 
+		if (version > 2) throw new UnsupportedVersionException(version);
+	}
+	
+	private void importSingleTiles(BuildingType buildingType, String dataString)
+	{
+		int i=0;
+		while (i < dataString.length())
+		{
+			int x = Converter.alphaNumericToInt(dataString.charAt(i));
+			int y = Converter.alphaNumericToInt(dataString.charAt(i+1));
+			
+			gridData[x][y] = new TileBuilding(buildingType, getNewId());
+
+			i += 2;
+		}
+	}
+	
 	public void addBuilding(Set<Point> buildingCoords, BuildingType buildingType)
 	{
 		int id = getNewId();

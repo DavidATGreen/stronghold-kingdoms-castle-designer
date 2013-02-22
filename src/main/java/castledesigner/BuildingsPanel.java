@@ -66,14 +66,15 @@ public class BuildingsPanel extends JPanel implements DesignListener
 		JToggleButton turretButton = createButton("<html>Turret</html>", BuildingType.TURRET);
 		JToggleButton smelterButton = createButton("<html>Smelter</html>", BuildingType.SMELTER);
 		JToggleButton moatButton = createButton("<html>Moat</html>", BuildingType.MOAT);
+		JToggleButton killingPitButton = createButton("<html>Killing Pit</html>", BuildingType.KILLING_PIT);
 
-		this.setMaximumSize(new Dimension(300, 600));
-		this.setMinimumSize(new Dimension(300, 600));
-		this.setPreferredSize(new Dimension(300, 600));
+		this.setMaximumSize(new Dimension(300, 650));
+		this.setMinimumSize(new Dimension(300, 650));
+		this.setPreferredSize(new Dimension(300, 650));
 
 		setLayout(new BorderLayout());
 
-		JPanel buttonsPanel = new JPanel(new GridLayout(7, 2));
+		JPanel buttonsPanel = new JPanel(new GridLayout(8, 2));
 		buttonsPanel.setBorder(new EmptyBorder(4, 4, 4, 4));
 		buttonsPanel.add(stoneWallButton);
 		buttonsPanel.add(woodenWallButton);
@@ -89,6 +90,7 @@ public class BuildingsPanel extends JPanel implements DesignListener
 		buttonsPanel.add(ballistaTowerButton);
 		buttonsPanel.add(turretButton);
 		buttonsPanel.add(moatButton);
+		buttonsPanel.add(killingPitButton);
 
 		add(buttonsPanel, BorderLayout.CENTER);
 

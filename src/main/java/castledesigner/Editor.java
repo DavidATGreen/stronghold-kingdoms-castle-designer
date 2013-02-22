@@ -305,6 +305,10 @@ public class Editor
 					{
 						errorMessage = "Choosing a random image is naughty!\n" + file.getAbsolutePath() + " is not a valid castle design image.";
 					}
+					catch (UnsupportedVersionException ex)
+					{
+						errorMessage = ex.getMessage();
+					}
 					finally
 					{
 						if (in != null)
@@ -473,7 +477,14 @@ public class Editor
 				{
 					public void actionPerformed(ActionEvent e)
 					{
-						importData(textArea.getText());
+						try
+						{
+							importData(textArea.getText());
+						}
+						catch (UnsupportedVersionException ex)
+						{
+							JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error Importing Design", JOptionPane.ERROR_MESSAGE);
+						}
 					}
 				});
 				panel.add(clipboardButton);
@@ -551,7 +562,7 @@ public class Editor
 		return landPanel.getLandGrid().getCastle().getGridDataExport();
 	}
 
-	private static void importData(String text)
+	private static void importData(String text) throws UnsupportedVersionException
 	{
 		if (text == null || text.length() == 0) return;
 
