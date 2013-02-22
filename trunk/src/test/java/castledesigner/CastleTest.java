@@ -442,4 +442,39 @@ public class CastleTest extends TestCase
 			instance.getMaximumNumberOfBuildings(buildingType);
 		}
 	}
+
+	/**
+	 * Test of getTotalResource method, of class Castle.
+	 */
+	public void testGetTotalResource()
+	{
+		System.out.println("getTotalResource");
+
+		Castle instance = new Castle();
+
+		for (BuildingResource buildingResource : BuildingResource.values())
+		{
+			/*
+			 * Hard to test when there's no direct setter.
+			 */
+			int amount = instance.getTotalResource(buildingResource);
+
+			assertTrue(amount >= 0);
+		}
+	}
+
+	/**
+	 * Test of getTotalBuildingTime method, of class Castle.
+	 */
+	public void testGetTotalBuildingTime()
+	{
+		System.out.println("getTotalBuildingTime");
+
+		Castle instance = new Castle();
+
+		/*
+		 * Hard to test when there's no direct setter.
+		 */
+		assertEquals(0, instance.getTotalBuildingTime());
+	}
 }

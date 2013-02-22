@@ -39,6 +39,8 @@ public class Castle
 
 	private Map<BuildingType, Integer> buildingQuantities = new HashMap<BuildingType, Integer>();
 	private Map<BuildingType, Integer> maxBuildings;
+	private Map<BuildingResource, Integer> buildingResources = new HashMap<BuildingResource, Integer>();
+	private int totalBuildingTime = 0;
 	private List<String> designErrors = new ArrayList<String>();
 	private TileBuilding[][] gridData = new TileBuilding[CASTLE_BOUNDRY_LENGTH][CASTLE_BOUNDRY_LENGTH];
 	private static int lastIdUsed = 0;
@@ -260,6 +262,12 @@ public class Castle
 	private void updateDesignStats()
 	{
 		designErrors.clear();
+		totalBuildingTime = 0;
+
+		for (BuildingResource buildingResource : BuildingResource.values())
+		{
+			buildingResources.put(buildingResource, 0);
+		}
 
 		int[] buildingCounts = new int[BuildingType.values().length];
 
@@ -276,6 +284,14 @@ public class Castle
 		{
 			int numberOfBuildings = calculateNumberOfBuildings(buildingType, buildingCounts[buildingType.ordinal()]);
 			buildingQuantities.put(buildingType, numberOfBuildings);
+
+			for (BuildingResource buildingResource : BuildingResource.values())
+			{
+				int cumulativeCost = buildingResources.get(buildingResource) + buildingType.getCost(buildingResource) * numberOfBuildings;
+				
+				buildingResources.put(buildingResource, cumulativeCost);
+			}
+			totalBuildingTime += buildingType.getBuildTime() * numberOfBuildings;
 		}
 
 		for (BuildingType buildingType : maxBuildings.keySet())
@@ -292,6 +308,16 @@ public class Castle
 	public int getNumberOfBuildings(BuildingType buildingType)
 	{
 		return buildingQuantities.get(buildingType);
+	}
+
+	public int getTotalResource(BuildingResource resource)
+	{
+		return buildingResources.get(resource);
+	}
+
+	public int getTotalBuildingTime()
+	{
+		return totalBuildingTime;
 	}
 
 	private int calculateNumberOfBuildings(BuildingType buildingType, int numberOfTiles)
