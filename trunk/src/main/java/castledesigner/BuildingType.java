@@ -60,7 +60,9 @@ public enum BuildingType
 	MOAT(new Color(0, 200, 255), new Dimension(1, 1), false),
 
 	//Keep
-	KEEP(new Color(0, 0, 0), new Dimension(8, 8), false);
+	KEEP(new Color(0, 0, 0), new Dimension(8, 8), false),
+
+	KILLING_PIT(new Color(120, 100, 0), new Dimension(1, 1), false);
 
 	private final Color colour;
 	private Dimension dimension;

@@ -108,6 +108,12 @@ public class LandGridTest extends TestCase
 			Logger.getLogger(LandGridTest.class.getName()).log(Level.SEVERE, null, ex);
 			fail("Error reading resources layout");
 		}
+		catch (UnsupportedVersionException ex)
+		{
+			System.err.println("Error reading resources layout");
+			Logger.getLogger(LandGridTest.class.getName()).log(Level.SEVERE, null, ex);
+			fail("Error reading resources layout");
+		}
 		catch (IOException ex)
 		{
 			System.err.println("Error reading resources layout");
@@ -170,6 +176,12 @@ public class LandGridTest extends TestCase
 			assertFalse(changed);
 		}
 		catch (FileNotFoundException ex)
+		{
+			System.err.println("Error reading resources layout");
+			Logger.getLogger(LandGridTest.class.getName()).log(Level.SEVERE, null, ex);
+			fail("Error reading resources layout");
+		}
+		catch (UnsupportedVersionException ex)
 		{
 			System.err.println("Error reading resources layout");
 			Logger.getLogger(LandGridTest.class.getName()).log(Level.SEVERE, null, ex);
@@ -292,6 +304,11 @@ public class LandGridTest extends TestCase
 			Logger.getLogger(LandGridTest.class.getName()).log(Level.SEVERE, null, ex);
 			fail("Error reading resources layout");
 		}
+		catch (UnsupportedVersionException ex)
+		{
+			Logger.getLogger(LandGridTest.class.getName()).log(Level.SEVERE, null, ex);
+			fail("Error reading resources layout");
+		}
 		catch (FileNotFoundException ex)
 		{
 			Logger.getLogger(LandGridTest.class.getName()).log(Level.SEVERE, null, ex);
@@ -343,6 +360,11 @@ public class LandGridTest extends TestCase
 			fail("Error reading resources layout");
 		}
 		catch (InvalidBarcodeException ex)
+		{
+			Logger.getLogger(LandGridTest.class.getName()).log(Level.SEVERE, null, ex);
+			fail("Error reading resources layout");
+		}
+		catch (UnsupportedVersionException ex)
 		{
 			Logger.getLogger(LandGridTest.class.getName()).log(Level.SEVERE, null, ex);
 			fail("Error reading resources layout");

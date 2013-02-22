@@ -36,6 +36,8 @@ import javax.swing.JTextField;
  */
 public class About extends JDialog
 {
+	public static final String PROJECT_URL_TEXT = "http://code.google.com/p/stronghold-kingdoms-castle-designer/";
+	
 	private JButton closeButton;
 	private JLabel programTitle;
 	private JTextField projectURL;
@@ -59,7 +61,7 @@ public class About extends JDialog
 		authorTitleLabel = new JLabel("Author:");
 		artistTitleLabel = new JLabel("Artwork By:");
 		programTitle = new JLabel("Stronghold Kingdoms Castle Designer");
-		projectURL = new JTextField("http://code.google.com/p/stronghold-kingdoms-castle-designer/");
+		projectURL = new JTextField(PROJECT_URL_TEXT);
 		projectURL.setEditable(false);
 		projectURL.setBorder(null);
 		projectURL.setBackground(null);
