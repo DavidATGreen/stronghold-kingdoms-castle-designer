@@ -29,9 +29,12 @@ import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
 import javax.swing.JToggleButton;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 /**
  *
@@ -40,12 +43,22 @@ import javax.swing.border.TitledBorder;
 public class BuildingsPanel extends JPanel implements DesignListener
 {
 	public static final String SELECTED_BUILDING = "SelectedBuilding";
+	private static final Integer[] constructionBonuses = new Integer[] {0, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60};
 	private ButtonGroup buildingButtonGroup = new ButtonGroup();
 	private static final Dimension buttonDimension = new Dimension(50, 50);
 	private JLabel moatsLabel;
 	private JLabel ballistaTowersLabel;
 	private JLabel turretsLabel;
 	private JLabel guardHousesLabel;
+
+	private JLabel stoneLabel;
+	private JLabel woodLabel;
+	private JLabel ironLabel;
+	private JLabel goldLabel;
+	private JLabel timeLabel;
+
+	private JSlider constructionSpeed;
+
 	private Castle castle;
 
 	public BuildingsPanel()
@@ -68,9 +81,9 @@ public class BuildingsPanel extends JPanel implements DesignListener
 		JToggleButton moatButton = createButton("<html>Moat</html>", BuildingType.MOAT);
 		JToggleButton killingPitButton = createButton("<html>Killing Pit</html>", BuildingType.KILLING_PIT);
 
-		this.setMaximumSize(new Dimension(300, 650));
-		this.setMinimumSize(new Dimension(300, 650));
-		this.setPreferredSize(new Dimension(300, 650));
+		this.setMaximumSize(new Dimension(300, 700));
+		this.setMinimumSize(new Dimension(300, 700));
+		this.setPreferredSize(new Dimension(300, 700));
 
 		setLayout(new BorderLayout());
 
@@ -94,6 +107,24 @@ public class BuildingsPanel extends JPanel implements DesignListener
 
 		add(buttonsPanel, BorderLayout.CENTER);
 
+		JPanel infoPanel = new JPanel(new BorderLayout());
+
+		JPanel quantitiesPanel = createQuantitiesPanel();
+		infoPanel.add(BorderLayout.NORTH, quantitiesPanel);
+		
+		JPanel resourcesPanel = createResourcesPanel();
+		infoPanel.add(BorderLayout.CENTER, resourcesPanel);
+
+		JPanel timePanel = createTimePanel();
+		infoPanel.add(BorderLayout.SOUTH, timePanel);
+
+		add(infoPanel, BorderLayout.SOUTH);
+
+		this.repaint();
+	}
+
+	private JPanel createQuantitiesPanel()
+	{
 		JPanel quantitiesPanel = new JPanel(new GridLayout(4, 2));
 		quantitiesPanel.setBorder(new TitledBorder("Number of Buildings"));
 		JLabel moatsTitleLabel = new JLabel("Moats");
@@ -113,10 +144,69 @@ public class BuildingsPanel extends JPanel implements DesignListener
 		quantitiesPanel.add(turretsLabel);
 		quantitiesPanel.add(moatsTitleLabel);
 		quantitiesPanel.add(moatsLabel);
-		
-		add(quantitiesPanel, BorderLayout.SOUTH);
 
-		this.repaint();
+		return quantitiesPanel;
+	}
+
+	private JPanel createResourcesPanel()
+	{
+		JPanel resourcesPanel = new JPanel(new GridLayout(2, 4));
+		resourcesPanel.setBorder(new TitledBorder("Resources Used"));
+		JLabel stoneTitleLabel = new JLabel("Stone");
+		stoneLabel = new JLabel("0");
+		JLabel woodTitleLabel = new JLabel("Wood");
+		woodLabel = new JLabel("0");
+		JLabel ironTitleLabel = new JLabel("Iron");
+		ironLabel = new JLabel("0");
+		JLabel goldTitleLabel = new JLabel("Gold");
+		goldLabel = new JLabel("0");
+		resourcesPanel.add(stoneTitleLabel);
+		resourcesPanel.add(stoneLabel);
+		resourcesPanel.add(woodTitleLabel);
+		resourcesPanel.add(woodLabel);
+		resourcesPanel.add(ironTitleLabel);
+		resourcesPanel.add(ironLabel);
+		resourcesPanel.add(goldTitleLabel);
+		resourcesPanel.add(goldLabel);
+
+		return resourcesPanel;
+	}
+
+	private JPanel createTimePanel()
+	{
+		timeLabel = new JLabel("0s");
+
+		constructionSpeed = new JSlider(JSlider.HORIZONTAL, 0, 10, 0);
+		constructionSpeed.setSnapToTicks(true);
+		constructionSpeed.setMinorTickSpacing(1);
+		constructionSpeed.setMajorTickSpacing(1);
+		constructionSpeed.setPaintTicks(true);
+		constructionSpeed.setPaintLabels(true);
+
+		constructionSpeed.addChangeListener(new ChangeListener()
+		{
+			public void stateChanged(ChangeEvent e)
+			{
+				updateTotalBuildingTime();
+			}
+		});
+
+		JPanel totalTimePanel = new JPanel();
+		totalTimePanel.setBorder(new TitledBorder("Construction Time"));
+		totalTimePanel.add(timeLabel);
+		totalTimePanel.setMinimumSize(new Dimension(104, 0));
+		totalTimePanel.setMaximumSize(new Dimension(104, 0));
+		totalTimePanel.setPreferredSize(new Dimension(104, 0));
+		
+		JPanel constructionResearchPanel = new JPanel();
+		constructionResearchPanel.setBorder(new TitledBorder("Construction Research Rank"));
+		constructionResearchPanel.add(constructionSpeed);
+
+		JPanel timePanel = new JPanel(new BorderLayout());
+		timePanel.add(BorderLayout.WEST, totalTimePanel);
+		timePanel.add(BorderLayout.CENTER, constructionResearchPanel);
+
+		return timePanel;
 	}
 
 	private JToggleButton createButton(String buttonText, final BuildingType buildingType)
@@ -152,6 +242,8 @@ public class BuildingsPanel extends JPanel implements DesignListener
 	public void designChanged()
 	{
 		updateBuildingQuantities();
+		updateResources();
+		updateTotalBuildingTime();
 	}
 
 	private void updateBuildingQuantities()
@@ -188,5 +280,65 @@ public class BuildingsPanel extends JPanel implements DesignListener
 		if (exceeded | maximum) s.append("</html>");
 
 		return s.toString();
+	}
+
+	private void updateResources()
+	{
+		stoneLabel.setText(getBuildingResources(BuildingResource.STONE));
+		woodLabel.setText(getBuildingResources(BuildingResource.WOOD));
+		ironLabel.setText(getBuildingResources(BuildingResource.IRON));
+		goldLabel.setText(getBuildingResources(BuildingResource.GOLD));
+	}
+
+	private void updateTotalBuildingTime()
+	{
+		if (castle != null)
+		{
+			int researchDiscount = constructionBonuses[constructionSpeed.getValue()];
+			int buildingTime = (int)(castle.getTotalBuildingTime() * (1 - (((double)researchDiscount) / 100)));
+			
+			timeLabel.setText(formatTime(buildingTime));
+		}
+		else timeLabel.setText("0s");
+	}
+
+	private String formatTime(int totalBuildingTime)
+	{
+		int time = totalBuildingTime;
+		StringBuffer s = new StringBuffer();
+
+		int seconds = time % 60;
+		int minutes = (time / 60) % 60;
+		int hours = (time / 3600) % 24;
+		int days = (time / 86400);
+
+		if (days > 0)
+		{
+			s.append(days);
+			s.append("d ");
+		}
+		if (days > 0 || hours > 0)
+		{
+			s.append(hours);
+			s.append("h ");
+		}
+		if (days > 0 || hours > 0 || minutes > 0)
+		{
+			s.append(minutes);
+			s.append("m ");
+		}
+		s.append(seconds);
+		s.append('s');
+
+		return s.toString();
+	}
+
+	private String getBuildingResources(BuildingResource buildingResource)
+	{
+		if (castle != null)
+		{
+			return String.valueOf(castle.getTotalResource(buildingResource));
+		}
+		else return "0";
 	}
 }

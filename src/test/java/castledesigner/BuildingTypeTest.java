@@ -208,4 +208,33 @@ public class BuildingTypeTest extends TestCase
 			assertNotNull(buildingType.getColour());
 		}
 	}
+
+	/**
+	 * Test of getCost method, of class BuildingType.
+	 */
+	public void testGetCost()
+	{
+		System.out.println("getCost");
+		
+		for (BuildingType buildingType : BuildingType.values())
+		{
+			for (BuildingResource buildingResource : BuildingResource.values())
+			{
+				assertNotNull(buildingType.getCost(buildingResource));
+			}
+		}
+	}
+
+	/**
+	 * Test of getBuildTime method, of class BuildingType.
+	 */
+	public void testGetBuildTime()
+	{
+		System.out.println("getBuildTime");
+		
+		for (BuildingType buildingType : BuildingType.values())
+		{
+			assertTrue(buildingType.getBuildTime() >= 0);
+		}
+	}
 }
