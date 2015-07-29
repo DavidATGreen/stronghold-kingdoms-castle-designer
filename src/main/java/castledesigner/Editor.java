@@ -38,6 +38,7 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import javax.imageio.ImageIO;
 import javax.swing.BoxLayout;
 import javax.swing.GroupLayout;
@@ -71,77 +72,63 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  */
 public class Editor
 {
-	public static final String programVersion = "1.10";
-	private static LandPanel landPanel;
-	private static JFrame frame;
-	private static JFileChooser saveFileChooser;
-	private static JFileChooser openFileChooser;
-	private static File currentFile;
-	private static JPanel errorPanel;
-	private static final String FILE_EXTENSION = "png";
-
-	public static void main( String[] args )
+	public static final String	programVersion	= "1.10";
+	private static LandPanel	landPanel;
+	private static JFrame		frame;
+	private static JFileChooser	saveFileChooser;
+	private static JFileChooser	openFileChooser;
+	private static File			currentFile;
+	private static JPanel		errorPanel;
+	private static final String	FILE_EXTENSION	= "png";
+	
+	public static void main(String[] args)
 	{
 		setLookAndFeel();
 		
 		JPanel mainPanel = new JPanel();
-
+		
 		landPanel = new LandPanel();
 		landPanel.getLandGrid().addDesignListener(new DesignListener()
 		{
 			public void designChanged()
 			{
-				errorPanel.removeAll();
-				List<String> designErrors = landPanel.getLandGrid().getCastle().getDesignErrors();
-				for (String designError : designErrors)
-				{
-					JLabel designErrorLabel = new JLabel(designError);
-					designErrorLabel.setForeground(Color.red);
-					designErrorLabel.setFont(new Font(designErrorLabel.getFont().getName(),
-						Font.BOLD, designErrorLabel.getFont().getSize()));
-					errorPanel.add(designErrorLabel);
-				}
-				errorPanel.revalidate();
+				updateErrorPanel();
 			}
 		});
-
+		
 		BuildingsPanel buildingsPanel = new BuildingsPanel();
 		buildingsPanel.setCastle(landPanel.getLandGrid().getCastle());
+		
 		buildingsPanel.addPropertyChangeListener(BuildingsPanel.SELECTED_BUILDING, new PropertyChangeListener()
 		{
 			public void propertyChange(PropertyChangeEvent evt)
 			{
-				landPanel.getLandGrid().setSelectedBuilding((BuildingType)evt.getNewValue());
+				landPanel.getLandGrid().setSelectedBuilding((BuildingType) evt.getNewValue());
 			}
 		});
+		
 		landPanel.getLandGrid().addDesignListener(buildingsPanel);
-
+		landPanel.getLandGrid().getCastle().setBuildingsPanel(buildingsPanel);
+		
 		TipsPanel tipsPanel = new TipsPanel();
-
+		
 		errorPanel = new JPanel();
 		errorPanel.setBorder(new EmptyBorder(5, 10, 0, 0));
 		errorPanel.setLayout(new BoxLayout(errorPanel, BoxLayout.Y_AXIS));
-
+		
 		JPanel rightPanel = new JPanel();
 		GroupLayout layout = new GroupLayout(rightPanel);
 		rightPanel.setLayout(layout);
-
+		
 		layout.setHorizontalGroup(
-			layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-				.addComponent(buildingsPanel)
-				.addComponent(errorPanel)
-				.addComponent(tipsPanel));
-		layout.setVerticalGroup(
-			layout.createSequentialGroup()
-				.addComponent(buildingsPanel)
-				.addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-				.addComponent(errorPanel)
-				.addComponent(tipsPanel));
-
-        	JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, landPanel, rightPanel);
+				layout.createParallelGroup(GroupLayout.Alignment.LEADING).addComponent(buildingsPanel).addComponent(errorPanel).addComponent(tipsPanel));
+		layout.setVerticalGroup(layout.createSequentialGroup().addComponent(buildingsPanel)
+				.addPreferredGap(ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE).addComponent(errorPanel).addComponent(tipsPanel));
+				
+		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, landPanel, rightPanel);
 		
 		mainPanel.add(splitPane);
-
+		
 		saveFileChooser = new JFileChooser();
 		saveFileChooser.setFileFilter(new FileNameExtensionFilter("Stronghold Kingdoms Castle Design", FILE_EXTENSION));
 		saveFileChooser.setAcceptAllFileFilterUsed(false);
@@ -161,30 +148,32 @@ public class Editor
 				}
 			}
 		});
-
+		
 		openFileChooser = new JFileChooser();
 		
-		//It would be nice to use the following, but for backwards compatibility reasons we can't.
-		//openFileChooser.setFileFilter(new FileNameExtensionFilter("Stronghold Kingdoms Castle Design", FILE_EXTENSION));
-
+		// It would be nice to use the following, but for backwards
+		// compatibility reasons we can't.
+		// openFileChooser.setFileFilter(new FileNameExtensionFilter("Stronghold
+		// Kingdoms Castle Design", FILE_EXTENSION));
+		
 		openFileChooser.setFileFilter(new FileFilter()
 		{
 			@Override
 			public boolean accept(File file)
 			{
 				String[] s = file.getName().split("\\.");
-				return file.isDirectory() || s.length <= 1 || s[s.length-1].equals(FILE_EXTENSION);
+				return file.isDirectory() || s.length <= 1 || s[s.length - 1].equals(FILE_EXTENSION);
 			}
-
+			
 			@Override
-			public String getDescription() 
+			public String getDescription()
 			{
 				return null;
 			}
 		});
-
+		
 		JScrollPane mainScrollPane = new JScrollPane(mainPanel);
-
+		
 		frame = new JFrame("Stronghold Kingdoms Castle Designer");
 		frame.setJMenuBar(createMenuBar());
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -192,7 +181,21 @@ public class Editor
 		frame.pack();
 		frame.setVisible(true);
 	}
-
+	
+	static void updateErrorPanel()
+	{
+		errorPanel.removeAll();
+		List<String> designErrors = landPanel.getLandGrid().getCastle().getDesignErrors();
+		for (String designError : designErrors)
+		{
+			JLabel designErrorLabel = new JLabel(designError);
+			designErrorLabel.setForeground(Color.red);
+			designErrorLabel.setFont(new Font(designErrorLabel.getFont().getName(), Font.BOLD, designErrorLabel.getFont().getSize()));
+			errorPanel.add(designErrorLabel);
+		}
+		errorPanel.revalidate();
+	}
+	
 	/**
 	 * Attempts to set the Look and Feel of the application to the native
 	 * platform.
@@ -202,25 +205,21 @@ public class Editor
 		try
 		{
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		}
-		catch (ClassNotFoundException ex)
+		} catch (ClassNotFoundException ex)
 		{
 			Logger.getLogger(Editor.class.getName()).log(Level.SEVERE, null, ex);
-		}
-		catch (InstantiationException ex)
+		} catch (InstantiationException ex)
 		{
 			Logger.getLogger(Editor.class.getName()).log(Level.SEVERE, null, ex);
-		}
-		catch (IllegalAccessException ex)
+		} catch (IllegalAccessException ex)
 		{
 			Logger.getLogger(Editor.class.getName()).log(Level.SEVERE, null, ex);
-		}
-		catch (UnsupportedLookAndFeelException ex)
+		} catch (UnsupportedLookAndFeelException ex)
 		{
 			Logger.getLogger(Editor.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
-
+	
 	/**
 	 * Returns the menu bar for our application's main screen.
 	 * 
@@ -228,14 +227,14 @@ public class Editor
 	 */
 	private static JMenuBar createMenuBar()
 	{
-        	JMenuBar menuBar = new JMenuBar();
+		JMenuBar menuBar = new JMenuBar();
 		
 		menuBar.add(createFileMenu());
 		menuBar.add(createHelpMenu());
-
+		
 		return menuBar;
 	}
-
+	
 	/**
 	 * Returns the File menu
 	 * 
@@ -243,12 +242,12 @@ public class Editor
 	 */
 	private static JMenu createFileMenu()
 	{
-        	JMenu fileMenu = new JMenu("File");
-
+		JMenu fileMenu = new JMenu("File");
+		
 		fileMenu.add(createOpenMenuItem());
 		fileMenu.add(createSaveMenuItem());
 		fileMenu.add(createSaveAsMenuItem());
-
+		
 		fileMenu.add(new JPopupMenu.Separator());
 		fileMenu.add(createExportMenuItem());
 		fileMenu.add(createImportMenuItem());
@@ -258,10 +257,10 @@ public class Editor
 		
 		fileMenu.add(new JPopupMenu.Separator());
 		fileMenu.add(createExitMenuItem());
-
+		
 		return fileMenu;
 	}
-
+	
 	/**
 	 * Returns the menu item to open/load castles.
 	 *
@@ -287,41 +286,35 @@ public class Editor
 						{
 							BufferedImage bufferedImage = ImageIO.read(file);
 							importString = Barcode.extractBarcode(bufferedImage);
-						}
-						else
+						} else
 						{
 							in = new BufferedReader(new FileReader(file));
 							importString = in.readLine();
 						}
 						importData(importString);
 						currentFile = file;
-					}
-					catch (IOException ex)
+					} catch (IOException ex)
 					{
 						Logger.getLogger(Editor.class.getName()).log(Level.SEVERE, null, ex);
 						errorMessage = ex.getLocalizedMessage();
-					}
-					catch (InvalidBarcodeException ex)
+					} catch (InvalidBarcodeException ex)
 					{
 						errorMessage = "Choosing a random image is naughty!\n" + file.getAbsolutePath() + " is not a valid castle design image.";
-					}
-					catch (UnsupportedVersionException ex)
+					} catch (UnsupportedVersionException ex)
 					{
 						errorMessage = ex.getMessage();
-					}
-					finally
+					} finally
 					{
 						if (in != null)
 						{
 							try
 							{
 								in.close();
-							}
-							catch (IOException ex)
+							} catch (IOException ex)
 							{
 								Logger.getLogger(Editor.class.getName()).log(Level.SEVERE, null, ex);
 							}
-						}	
+						}
 						if (errorMessage != null)
 						{
 							JOptionPane.showMessageDialog(frame, errorMessage, "Error Reading File", JOptionPane.ERROR_MESSAGE);
@@ -332,7 +325,7 @@ public class Editor
 		});
 		return openMenuItem;
 	}
-
+	
 	/**
 	 * Returns the menu item to save the castle.
 	 *
@@ -348,8 +341,7 @@ public class Editor
 				if (currentFile == null || !currentFile.getName().endsWith('.' + FILE_EXTENSION))
 				{
 					showSaveDialog();
-				}
-				else
+				} else
 				{
 					saveFile(currentFile);
 				}
@@ -357,7 +349,7 @@ public class Editor
 		});
 		return saveMenuItem;
 	}
-
+	
 	private static void showSaveDialog()
 	{
 		int result = saveFileChooser.showSaveDialog(frame);
@@ -366,7 +358,7 @@ public class Editor
 			saveFile(saveFileChooser.getSelectedFile());
 		}
 	}
-
+	
 	private static void saveFile(File file)
 	{
 		PrintWriter out = null;
@@ -374,15 +366,13 @@ public class Editor
 		{
 			BufferedImage bufferedImage = landPanel.getDesignImage();
 			Barcode.embedBarcode(bufferedImage, generateExportString());
-
+			
 			ImageIO.write(bufferedImage, "png", file);
 			currentFile = file;
-		}
-		catch (IOException ex)
+		} catch (IOException ex)
 		{
 			Logger.getLogger(Editor.class.getName()).log(Level.SEVERE, null, ex);
-		}
-		finally
+		} finally
 		{
 			if (out != null)
 			{
@@ -391,7 +381,7 @@ public class Editor
 			}
 		}
 	}
-
+	
 	/**
 	 * Returns the menu item to save the castle under a specific filename.
 	 *
@@ -409,7 +399,7 @@ public class Editor
 		});
 		return saveAsMenuItem;
 	}
-
+	
 	/**
 	 * Returns the menu item responsible for showing a text string containing
 	 * all the inputted data.
@@ -430,10 +420,10 @@ public class Editor
 				
 				JScrollPane scrollPane = new JScrollPane(textArea);
 				scrollPane.setPreferredSize(new Dimension(450, 300));
-
+				
 				JPanel panel = new JPanel();
 				panel.add(scrollPane);
-
+				
 				JButton clipboardButton = new JButton("Copy to Clipboard");
 				clipboardButton.addActionListener(new ActionListener()
 				{
@@ -449,10 +439,10 @@ public class Editor
 		});
 		return exportMenuItem;
 	}
-
+	
 	/**
-	 * Returns the menu item responsible for allowing input of a string
-	 * that will populate our data.
+	 * Returns the menu item responsible for allowing input of a string that
+	 * will populate our data.
 	 *
 	 * @return the JMenuItem for importing
 	 */
@@ -465,13 +455,13 @@ public class Editor
 			{
 				final JTextArea textArea = new JTextArea();
 				textArea.setLineWrap(true);
-
+				
 				JScrollPane scrollPane = new JScrollPane(textArea);
 				scrollPane.setPreferredSize(new Dimension(450, 300));
-
+				
 				JPanel panel = new JPanel();
 				panel.add(scrollPane);
-
+				
 				JButton clipboardButton = new JButton("Import");
 				clipboardButton.addActionListener(new ActionListener()
 				{
@@ -480,8 +470,7 @@ public class Editor
 						try
 						{
 							importData(textArea.getText());
-						}
-						catch (UnsupportedVersionException ex)
+						} catch (UnsupportedVersionException ex)
 						{
 							JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error Importing Design", JOptionPane.ERROR_MESSAGE);
 						}
@@ -512,7 +501,7 @@ public class Editor
 		});
 		return exitMenuItem;
 	}
-
+	
 	/**
 	 * Returns a menu item for clearing the data.
 	 *
@@ -525,15 +514,15 @@ public class Editor
 		{
 			public void actionPerformed(ActionEvent e)
 			{
-				//We don't want to accidently save over a previous design
+				// We don't want to accidently save over a previous design
 				currentFile = null;
-
+				
 				landPanel.getLandGrid().clearData();
 			}
 		});
 		return exitMenuItem;
 	}
-
+	
 	/**
 	 * Returns the help menu.
 	 *
@@ -553,19 +542,20 @@ public class Editor
 			}
 		});
 		helpMenu.add(aboutMenuItem);
-
+		
 		return helpMenu;
 	}
-
+	
 	private static String generateExportString()
 	{
 		return landPanel.getLandGrid().getCastle().getGridDataExport();
 	}
-
+	
 	private static void importData(String text) throws UnsupportedVersionException
 	{
-		if (text == null || text.length() == 0) return;
-
+		if (text == null || text.length() == 0)
+			return;
+			
 		landPanel.getLandGrid().importData(text);
 	}
 }
