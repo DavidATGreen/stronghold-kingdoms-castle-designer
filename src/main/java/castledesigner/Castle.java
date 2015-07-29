@@ -67,6 +67,7 @@ public class Castle
 		maxBuildings.put(BuildingType.MOAT, 500);
 		maxBuildings.put(BuildingType.BALLISTA_TOWER, getMaximumBuildingsPerAge(BuildingType.BALLISTA_TOWER));
 		maxBuildings.put(BuildingType.TURRET, getMaximumBuildingsPerAge(BuildingType.TURRET));
+		maxBuildings.put(BuildingType.BOMBARD, getMaximumBuildingsPerAge(BuildingType.BOMBARD));
 		maxBuildings.put(BuildingType.GUARD_HOUSE, 38);
 	}
 	
@@ -79,12 +80,16 @@ public class Castle
 			case 2:
 				switch (b)
 				{
+					case BOMBARD:
+						return 0;
 					case BALLISTA_TOWER:
 					case TURRET:
 						return 10;
 					default:
 						break;
 				}
+				
+				// from age 3 and on, there are more turrets and ballistas possible
 			case 3:
 				switch (b)
 				{
@@ -95,9 +100,21 @@ public class Castle
 						break;
 				}
 			case 4:
+				switch (b)
+				{
+					case BOMBARD:
+						return 3;
+					case BALLISTA_TOWER:
+					case TURRET:
+						return 20;
+					default:
+						break;
+				}
 			case 5:
 				switch (b)
 				{
+					case BOMBARD:
+						return 5;
 					case BALLISTA_TOWER:
 					case TURRET:
 						return 20;
@@ -151,8 +168,7 @@ public class Castle
 	}
 	
 	/**
-	 * Returns a string full of lovely data representing what buildings were
-	 * placed where.
+	 * Returns a string full of lovely data representing what buildings were placed where.
 	 * 
 	 * @return
 	 */

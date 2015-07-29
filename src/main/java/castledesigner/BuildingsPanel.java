@@ -54,6 +54,7 @@ public class BuildingsPanel extends JPanel implements DesignListener
 	private JLabel					ballistaTowersLabel;
 	private JLabel					turretsLabel;
 	private JLabel					guardHousesLabel;
+	private JLabel					bombardsLabel;
 	
 	private JLabel	stoneLabel;
 	private JLabel	woodLabel;
@@ -82,6 +83,7 @@ public class BuildingsPanel extends JPanel implements DesignListener
 		JToggleButton guardHouseButton = createButton("<html>Guard House</html>", BuildingType.GUARD_HOUSE);
 		JToggleButton ballistaTowerButton = createButton("<html>Ballista Tower</html>", BuildingType.BALLISTA_TOWER);
 		JToggleButton turretButton = createButton("<html>Turret</html>", BuildingType.TURRET);
+		JToggleButton bombardButton = createButton("<html>Bombard</html>", BuildingType.BOMBARD);
 		JToggleButton smelterButton = createButton("<html>Smelter</html>", BuildingType.SMELTER);
 		JToggleButton moatButton = createButton("<html>Moat</html>", BuildingType.MOAT);
 		JToggleButton killingPitButton = createButton("<html>Killing Pit</html>", BuildingType.KILLING_PIT);
@@ -110,6 +112,7 @@ public class BuildingsPanel extends JPanel implements DesignListener
 		buttonsPanel.add(smelterButton);
 		buttonsPanel.add(ballistaTowerButton);
 		buttonsPanel.add(turretButton);
+		buttonsPanel.add(bombardButton);
 		buttonsPanel.add(moatButton);
 		buttonsPanel.add(killingPitButton);
 		
@@ -133,12 +136,14 @@ public class BuildingsPanel extends JPanel implements DesignListener
 	
 	private JPanel createQuantitiesPanel()
 	{
-		JPanel quantitiesPanel = new JPanel(new GridLayout(4, 2));
+		JPanel quantitiesPanel = new JPanel(new GridLayout(5, 2));
 		quantitiesPanel.setBorder(new TitledBorder("Number of Buildings"));
 		JLabel moatsTitleLabel = new JLabel("Moats");
 		moatsLabel = new JLabel("-/-");
 		JLabel ballistaTowersTitleLabel = new JLabel("Ballista Towers");
 		ballistaTowersLabel = new JLabel("-/-");
+		JLabel bombardsTitleLabel = new JLabel("Bombards");
+		bombardsLabel = new JLabel("-/-");
 		JLabel turretsTitleLabel = new JLabel("Turrets");
 		turretsLabel = new JLabel("-/-");
 		JLabel guardHousesTitleLabel = new JLabel("Guard Houses");
@@ -150,6 +155,8 @@ public class BuildingsPanel extends JPanel implements DesignListener
 		quantitiesPanel.add(ballistaTowersLabel);
 		quantitiesPanel.add(turretsTitleLabel);
 		quantitiesPanel.add(turretsLabel);
+		quantitiesPanel.add(bombardsTitleLabel);
+		quantitiesPanel.add(bombardsLabel);
 		quantitiesPanel.add(moatsTitleLabel);
 		quantitiesPanel.add(moatsLabel);
 		
@@ -323,6 +330,7 @@ public class BuildingsPanel extends JPanel implements DesignListener
 		moatsLabel.setText(getBuildingQuantities(BuildingType.MOAT));
 		ballistaTowersLabel.setText(getBuildingQuantities(BuildingType.BALLISTA_TOWER));
 		turretsLabel.setText(getBuildingQuantities(BuildingType.TURRET));
+		bombardsLabel.setText(getBuildingQuantities(BuildingType.BOMBARD));
 		guardHousesLabel.setText(getBuildingQuantities(BuildingType.GUARD_HOUSE));
 	}
 	
