@@ -289,8 +289,9 @@ public class Castle
 			importSingleTiles(BuildingType.KILLING_PIT, dataStrings[4]);
 		updateDesignStats();
 		
-		buildingsPanelRef.updateAgeSelection(age);
-		
+		if (buildingsPanelRef != null)
+			buildingsPanelRef.updateAgeSelection(age);
+			
 		if (version > 3)
 			throw new UnsupportedVersionException(version);
 	}
