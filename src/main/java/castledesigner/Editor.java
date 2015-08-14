@@ -72,7 +72,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  */
 public class Editor
 {
-	public static final String	programVersion	= "1.10";
+	public static final String	programVersion	= "1.11";
 	private static LandPanel	landPanel;
 	private static JFrame		frame;
 	private static JFileChooser	saveFileChooser;
