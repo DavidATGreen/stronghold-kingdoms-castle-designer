@@ -21,10 +21,19 @@
 package castledesigner;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.imageio.ImageIO;
+import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -44,11 +53,13 @@ public class BuildingsPanel extends JPanel implements DesignListener
 {
 	public static final String SELECTED_BUILDING = "SelectedBuilding";
 	private static final Integer[] constructionBonuses = new Integer[] {0, 10, 15, 20, 25, 30, 35, 40, 45, 50, 60};
-	private ButtonGroup buildingButtonGroup = new ButtonGroup();
+	private final ButtonGroup buildingButtonGroup = new ButtonGroup();
+	private final ButtonGroup worldAgeButtonGroup = new ButtonGroup();
 	private static final Dimension buttonDimension = new Dimension(50, 50);
 	private JLabel moatsLabel;
 	private JLabel ballistaTowersLabel;
 	private JLabel turretsLabel;
+	private JLabel bombardsLabel;
 	private JLabel guardHousesLabel;
 
 	private JLabel stoneLabel;
@@ -56,6 +67,12 @@ public class BuildingsPanel extends JPanel implements DesignListener
 	private JLabel ironLabel;
 	private JLabel goldLabel;
 	private JLabel timeLabel;
+
+	private JToggleButton age1Button;
+	private JToggleButton age2Button;
+	private JToggleButton age3Button;
+	private JToggleButton age4Button;
+	private JToggleButton age5Button;
 
 	private JSlider constructionSpeed;
 
@@ -80,6 +97,7 @@ public class BuildingsPanel extends JPanel implements DesignListener
 		JToggleButton smelterButton = createButton("<html>Smelter</html>", BuildingType.SMELTER);
 		JToggleButton moatButton = createButton("<html>Moat</html>", BuildingType.MOAT);
 		JToggleButton killingPitButton = createButton("<html>Killing Pit</html>", BuildingType.KILLING_PIT);
+		JToggleButton bombardButton = createButton("<html>Bombard</html>", BuildingType.BOMBARD);
 
 		this.setMaximumSize(new Dimension(300, 700));
 		this.setMinimumSize(new Dimension(300, 700));
@@ -102,6 +120,7 @@ public class BuildingsPanel extends JPanel implements DesignListener
 		buttonsPanel.add(smelterButton);
 		buttonsPanel.add(ballistaTowerButton);
 		buttonsPanel.add(turretButton);
+		buttonsPanel.add(bombardButton);
 		buttonsPanel.add(moatButton);
 		buttonsPanel.add(killingPitButton);
 
@@ -109,7 +128,7 @@ public class BuildingsPanel extends JPanel implements DesignListener
 
 		JPanel infoPanel = new JPanel(new BorderLayout());
 
-		JPanel quantitiesPanel = createQuantitiesPanel();
+		JPanel quantitiesPanel = createQuantitiesAndAgePanel();
 		infoPanel.add(BorderLayout.NORTH, quantitiesPanel);
 		
 		JPanel resourcesPanel = createResourcesPanel();
@@ -120,13 +139,32 @@ public class BuildingsPanel extends JPanel implements DesignListener
 
 		add(infoPanel, BorderLayout.SOUTH);
 
+		setSelected(stoneWallButton, buildingButtonGroup);
+
 		this.repaint();
+	}
+
+	private JPanel createQuantitiesAndAgePanel()
+	{
+		JPanel quantitiesAndAgePanel = new JPanel(new BorderLayout());
+
+		JPanel quantitiesPanel = createQuantitiesPanel();
+		JPanel worldAgePanel = createWorldAgePanel();
+		
+		quantitiesAndAgePanel.add(BorderLayout.CENTER, quantitiesPanel);
+		quantitiesAndAgePanel.add(BorderLayout.EAST, worldAgePanel);
+
+		return quantitiesAndAgePanel;
 	}
 
 	private JPanel createQuantitiesPanel()
 	{
-		JPanel quantitiesPanel = new JPanel(new GridLayout(4, 2));
+		JPanel quantitiesPanel = new JPanel(new BorderLayout());
 		quantitiesPanel.setBorder(new TitledBorder("Number of Buildings"));
+		
+		JPanel titlePanel = new JPanel(new GridLayout(5, 1));
+		JPanel numberOfBuildingsPanel = new JPanel(new GridLayout(5, 1));
+
 		JLabel moatsTitleLabel = new JLabel("Moats");
 		moatsLabel = new JLabel("-/-");
 		JLabel ballistaTowersTitleLabel = new JLabel("Ballista Towers");
@@ -135,18 +173,60 @@ public class BuildingsPanel extends JPanel implements DesignListener
 		turretsLabel = new JLabel("-/-");
 		JLabel guardHousesTitleLabel = new JLabel("Guard Houses");
 		guardHousesLabel = new JLabel("-/-");
+		JLabel bombardsTitleLabel = new JLabel("Bombards");
+		bombardsLabel = new JLabel("-/-");
 
-		quantitiesPanel.add(guardHousesTitleLabel);
-		quantitiesPanel.add(guardHousesLabel);
-		quantitiesPanel.add(ballistaTowersTitleLabel);
-		quantitiesPanel.add(ballistaTowersLabel);
-		quantitiesPanel.add(turretsTitleLabel);
-		quantitiesPanel.add(turretsLabel);
-		quantitiesPanel.add(moatsTitleLabel);
-		quantitiesPanel.add(moatsLabel);
+		titlePanel.add(guardHousesTitleLabel);
+		numberOfBuildingsPanel.add(guardHousesLabel);
+		titlePanel.add(ballistaTowersTitleLabel);
+		numberOfBuildingsPanel.add(ballistaTowersLabel);
+		titlePanel.add(turretsTitleLabel);
+		numberOfBuildingsPanel.add(turretsLabel);
+		titlePanel.add(bombardsTitleLabel);
+		numberOfBuildingsPanel.add(bombardsLabel);
+		titlePanel.add(moatsTitleLabel);
+		numberOfBuildingsPanel.add(moatsLabel);
+
+		quantitiesPanel.add(titlePanel, BorderLayout.WEST);
+		quantitiesPanel.add(numberOfBuildingsPanel, BorderLayout.EAST);
 
 		return quantitiesPanel;
 	}
+
+	private JPanel createWorldAgePanel()
+	{
+		JPanel worldAgePanel = new JPanel(new GridLayout(2, 4));
+		worldAgePanel.setBorder(new TitledBorder("World Age"));
+
+		age1Button = createWorldAgeButton(1);
+		age2Button = createWorldAgeButton(2);
+		age3Button = createWorldAgeButton(3);
+		age4Button = createWorldAgeButton(4);
+		age5Button = createWorldAgeButton(5);
+
+		worldAgePanel.add(age1Button);
+		worldAgePanel.add(age2Button);
+		worldAgePanel.add(age3Button);
+		worldAgePanel.add(age4Button);
+		worldAgePanel.add(age5Button);
+
+		setSelected(age1Button, worldAgeButtonGroup);
+		
+		return worldAgePanel;
+	}
+	
+	private JToggleButton getWorldAgeButton(int worldAge)
+	{
+		switch (worldAge)
+		{
+			case 1: return age1Button;
+			case 2: return age2Button;
+			case 3: return age3Button;
+			case 4: return age4Button;
+			case 5: return age5Button;
+			default: return null;
+		}
+	}	
 
 	private JPanel createResourcesPanel()
 	{
@@ -211,7 +291,7 @@ public class BuildingsPanel extends JPanel implements DesignListener
 
 	private JToggleButton createButton(String buttonText, final BuildingType buildingType)
 	{
-		JToggleButton button;
+		final JToggleButton button;
 		if (buildingType.getImage() != null) button = new JToggleButton(buttonText, new ImageIcon(buildingType.getImage()));
 		else
 		{
@@ -227,10 +307,65 @@ public class BuildingsPanel extends JPanel implements DesignListener
 			public void actionPerformed(ActionEvent e)
 			{
 				BuildingsPanel.this.firePropertyChange(SELECTED_BUILDING, 0, buildingType);
+				setSelected(button, buildingButtonGroup);
 			}
 		});
 		buildingButtonGroup.add(button);
 		return button;
+	}
+
+	private JToggleButton createWorldAgeButton(final int worldAge)
+	{
+		String urlPath = "/worldAges/age" + String.valueOf(worldAge) + ".png";
+		URL url = getClass().getResource(urlPath.toLowerCase());
+
+		Image image = null;
+		if (url != null)
+		{
+			try
+			{
+				image = ImageIO.read(url);
+			} catch (IOException ex)
+			{
+				Logger.getLogger(BuildingsPanel.class.getName()).log(Level.SEVERE, null, ex);
+			}
+		}
+
+		final JToggleButton button;
+
+		if (image != null) button = new JToggleButton(new ImageIcon(image));
+		else button = new JToggleButton(String.valueOf(worldAge));
+
+		Dimension dim = new Dimension(42, 38);
+
+		button.setPreferredSize(dim);
+		button.setMinimumSize(dim);
+		button.setSize(dim);
+
+		button.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				castle.setWorldAge(worldAge);//Recalculates number of allowed buildings and sets up any error strings
+				designChanged();//Updates the numbers visible in the panel, and adds a border around the world age button
+			}
+		});
+		worldAgeButtonGroup.add(button);
+
+		return button;
+	}
+
+	private void setSelected(JToggleButton button, ButtonGroup group)
+	{
+		Enumeration<AbstractButton> elements = group.getElements();
+		while (elements.hasMoreElements())
+		{
+			AbstractButton b = elements.nextElement();
+			b.setBackground(Color.WHITE);
+			b.setOpaque(false);
+		}
+		button.setBackground(Color.BLUE);
+		button.setOpaque(true);
 	}
 
 	public void setCastle(Castle castle)
@@ -241,6 +376,15 @@ public class BuildingsPanel extends JPanel implements DesignListener
 
 	public void designChanged()
 	{
+		if (castle != null)
+		{
+			JToggleButton worldAgeButton = getWorldAgeButton(castle.getWorldAge());
+			if (worldAgeButton != null)
+			{
+				setSelected(worldAgeButton, worldAgeButtonGroup);
+			}
+		}
+				
 		updateBuildingQuantities();
 		updateResources();
 		updateTotalBuildingTime();
@@ -252,6 +396,7 @@ public class BuildingsPanel extends JPanel implements DesignListener
 		ballistaTowersLabel.setText(getBuildingQuantities(BuildingType.BALLISTA_TOWER));
 		turretsLabel.setText(getBuildingQuantities(BuildingType.TURRET));
 		guardHousesLabel.setText(getBuildingQuantities(BuildingType.GUARD_HOUSE));
+		bombardsLabel.setText(getBuildingQuantities(BuildingType.BOMBARD));
 	}
 
 	private String getBuildingQuantities(BuildingType buildingType)

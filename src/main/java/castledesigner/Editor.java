@@ -87,23 +87,6 @@ public class Editor
 		JPanel mainPanel = new JPanel();
 
 		landPanel = new LandPanel();
-		landPanel.getLandGrid().addDesignListener(new DesignListener()
-		{
-			public void designChanged()
-			{
-				errorPanel.removeAll();
-				List<String> designErrors = landPanel.getLandGrid().getCastle().getDesignErrors();
-				for (String designError : designErrors)
-				{
-					JLabel designErrorLabel = new JLabel(designError);
-					designErrorLabel.setForeground(Color.red);
-					designErrorLabel.setFont(new Font(designErrorLabel.getFont().getName(),
-						Font.BOLD, designErrorLabel.getFont().getSize()));
-					errorPanel.add(designErrorLabel);
-				}
-				errorPanel.revalidate();
-			}
-		});
 
 		BuildingsPanel buildingsPanel = new BuildingsPanel();
 		buildingsPanel.setCastle(landPanel.getLandGrid().getCastle());
@@ -191,6 +174,11 @@ public class Editor
 		frame.getContentPane().add(mainScrollPane);
 		frame.pack();
 		frame.setVisible(true);
+	}
+
+	public static JPanel getErrorPanel()
+	{
+		return errorPanel;
 	}
 
 	/**

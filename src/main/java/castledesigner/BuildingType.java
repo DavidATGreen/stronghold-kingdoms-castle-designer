@@ -67,7 +67,8 @@ public enum BuildingType
 	//Keep
 	KEEP(new Color(0, 0, 0), new Dimension(8, 8), false, new Integer[] {0, 0, 0, 0}, 0),
 
-	KILLING_PIT(new Color(120, 100, 0), new Dimension(1, 1), false, new Integer[] {0, 0, 100, 0}, 3600);
+	KILLING_PIT(new Color(120, 100, 0), new Dimension(1, 1), false, new Integer[] {0, 0, 100, 0}, 3600),
+	BOMBARD(new Color(70, 70, 70), new Dimension(3, 3), false, new Integer[] {0, 0, 1000, 0}, 43200);
 
 	private final Color colour;
 	private Dimension dimension;

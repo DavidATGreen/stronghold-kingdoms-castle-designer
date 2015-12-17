@@ -20,13 +20,19 @@
  */
 package castledesigner;
 
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 /**
  *
@@ -35,36 +41,49 @@ import java.util.Set;
 public class Castle
 {
 	public static final int CASTLE_BOUNDRY_LENGTH = 52;
-	public static final int exportVersionId = 2;
+	
+	/* The export version id should only be increased as a last resort, otherwise a user is forced to
+	 * update their client to load a design.
+	 * Futureproofing now gracefully ignores any unknown building types, so there is no longer a need
+	 * to increment the export version id when new buildings are added.
+	 */
+	public static final int exportVersionId = 3;
 
 	private Map<BuildingType, Integer> buildingQuantities = new HashMap<BuildingType, Integer>();
-	private Map<BuildingType, Integer> maxBuildings;
+	private final EnumSet<BuildingType> limitedBuildings = EnumSet.of(BuildingType.MOAT,
+									BuildingType.BALLISTA_TOWER,
+									BuildingType.TURRET,
+									BuildingType.GUARD_HOUSE,
+									BuildingType.BOMBARD);
 	private Map<BuildingResource, Integer> buildingResources = new HashMap<BuildingResource, Integer>();
 	private int totalBuildingTime = 0;
-	private List<String> designErrors = new ArrayList<String>();
+	private final List<String> designErrors = new ArrayList<String>();
 	private TileBuilding[][] gridData = new TileBuilding[CASTLE_BOUNDRY_LENGTH][CASTLE_BOUNDRY_LENGTH];
 	private static int lastIdUsed = 0;
+	private int worldAge = 1;
 
 	public Castle()
 	{
-		maxBuildings = new HashMap<BuildingType, Integer>();
-		setMaxBuildings();
-
 		//Call reset here to set the Keep in the centre
 		resetGridData();
+	}
+
+	public int getWorldAge()
+	{
+		return worldAge;
+	}
+
+	public void setWorldAge(int worldAge)
+	{
+		if (worldAge < 1) throw new RuntimeException("Invalid world age: " + worldAge);
+
+		this.worldAge = worldAge;
+		updateDesignStats();
 	}
 	
 	public TileBuilding getGridData(int x, int y)
 	{
 		return gridData[x][y];
-	}
-
-	private void setMaxBuildings()
-	{
-		maxBuildings.put(BuildingType.MOAT, 500);
-		maxBuildings.put(BuildingType.BALLISTA_TOWER, 10);
-		maxBuildings.put(BuildingType.TURRET, 10);
-		maxBuildings.put(BuildingType.GUARD_HOUSE, 38);
 	}
 
 	public void removeBuilding(TileBuilding building)
@@ -104,7 +123,7 @@ public class Castle
 				gridData[i][j] = new TileBuilding(BuildingType.KEEP, 0);
 			}
 		}
-		updateDesignStats();
+		setWorldAge(1); //This calls updateDesignStats()
 	}
 
 	/**
@@ -176,7 +195,10 @@ public class Castle
 					.append(Converter.seperator)
 					.append(moats)
 					.append(Converter.seperator)
-					.append(killingPits).toString();
+					.append(killingPits)
+					.append(Converter.seperator)
+					.append(getWorldAge())
+					.toString();
 	}
 
 	private int getNewId()
@@ -207,15 +229,23 @@ public class Castle
 				int x = Converter.alphaNumericToInt(dataStrings[2].charAt(i+1));
 				int y = Converter.alphaNumericToInt(dataStrings[2].charAt(i+2));
 				
-				BuildingType buildingType = BuildingType.values()[ordinal];
-				int id = getNewId();
-
-				for (int k=x; k<x+buildingType.getDimension().getWidth(); k++)
+				try
 				{
-					for (int l=y; l<y+buildingType.getDimension().getHeight(); l++)
+					BuildingType buildingType = BuildingType.values()[ordinal];
+					int id = getNewId();
+
+					for (int k=x; k<x+buildingType.getDimension().getWidth(); k++)
 					{
-						gridData[k][l] = new TileBuilding(buildingType, id);
+						for (int l=y; l<y+buildingType.getDimension().getHeight(); l++)
+						{
+							gridData[k][l] = new TileBuilding(buildingType, id);
+						}
 					}
+				}
+				catch (ArrayIndexOutOfBoundsException e)
+				{
+					//The client is trying to load a building that it doesn't yet know about
+					//Best thing to do here is to gracefully ignore it!
 				}
 
 				i += 3;
@@ -223,9 +253,10 @@ public class Castle
 		}
 		if (dataStrings.length > 3 && dataStrings[3] != null) importSingleTiles(BuildingType.MOAT, dataStrings[3]);
 		if (dataStrings.length > 4 && dataStrings[4] != null) importSingleTiles(BuildingType.KILLING_PIT, dataStrings[4]);
-		updateDesignStats();
+		if (version >= 3 && dataStrings.length > 5 && dataStrings[5] != null) setWorldAge(Integer.parseInt(dataStrings[5]));
+		else updateDesignStats(); //setWorldAge() calls updateDesignStats()
 
-		if (version > 2) throw new UnsupportedVersionException(version);
+		if (version > 3) throw new UnsupportedVersionException(version);
 	}
 	
 	private void importSingleTiles(BuildingType buildingType, String dataString)
@@ -293,14 +324,33 @@ public class Castle
 			totalBuildingTime += buildingType.getBuildTime() * numberOfBuildings;
 		}
 
-		for (BuildingType buildingType : maxBuildings.keySet())
+		for (BuildingType buildingType : limitedBuildings)
 		{
 			String designError = validateNumberOfBuildings(
 				buildingType,
 				buildingCounts[buildingType.ordinal()],
-				maxBuildings.get(buildingType));
+				getMaximumNumberOfBuildings(buildingType, worldAge));
 
 			if (designError != null) designErrors.add(designError);
+		}
+		updateErrorPanel();
+	}
+
+	private void updateErrorPanel()
+	{
+		JPanel errorPanel = Editor.getErrorPanel();
+		if (errorPanel != null)
+		{
+			errorPanel.removeAll();
+			for (String designError : designErrors)
+			{
+				JLabel designErrorLabel = new JLabel(designError);
+				designErrorLabel.setForeground(Color.red);
+				designErrorLabel.setFont(new Font(designErrorLabel.getFont().getName(),
+					Font.BOLD, designErrorLabel.getFont().getSize()));
+				errorPanel.add(designErrorLabel);
+			}
+			errorPanel.revalidate();
 		}
 	}
 
@@ -337,8 +387,26 @@ public class Castle
 
 	public int getMaximumNumberOfBuildings(BuildingType buildingType)
 	{
-		Integer max = maxBuildings.get(buildingType);
-		if (max == null) return 0;
-		else return max;
+		return getMaximumNumberOfBuildings(buildingType, worldAge);
+	}
+
+	private int getMaximumNumberOfBuildings(BuildingType buildingType, int worldAge)
+	{
+		switch (buildingType)
+		{
+			case MOAT: return 500;
+			case BALLISTA_TOWER:
+			case TURRET:
+				if (worldAge < 3) return 10;
+				else if (worldAge == 3) return 15;
+				else return 20;
+			case GUARD_HOUSE:
+				return 38;
+			case BOMBARD:
+				if (worldAge < 4) return 0;
+				else if (worldAge == 4) return 3;
+				else return 5;
+			default: return Integer.MAX_VALUE;
+		}
 	}
 }
