@@ -5,7 +5,7 @@
 
 	<groupId>groupid</groupId>
 	<artifactId>StrongholdKingdomsCastleDesigner</artifactId>
-	<version>1.10</version>
+	<version>1.11</version>
 	<packaging>jar</packaging>
 
 	<name>StrongholdKingdomsCastleDesigner</name>

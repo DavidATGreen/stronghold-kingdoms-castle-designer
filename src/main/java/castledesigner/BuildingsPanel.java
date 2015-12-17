@@ -316,7 +316,7 @@ public class BuildingsPanel extends JPanel implements DesignListener
 
 	private JToggleButton createWorldAgeButton(final int worldAge)
 	{
-		String urlPath = "/worldAges/age" + String.valueOf(worldAge) + ".png";
+		String urlPath = "/world_ages/age" + String.valueOf(worldAge) + ".png";
 		URL url = getClass().getResource(urlPath.toLowerCase());
 
 		Image image = null;
