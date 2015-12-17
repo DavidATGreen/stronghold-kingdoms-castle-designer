@@ -4,7 +4,7 @@ Designs are saved as images for easy access, and barcoded to allow the image to 
 
 ##Screenshots
 
-<img src="http://oi60.tinypic.com/2i92k1z.jpg"/>
+<img src="http://oi64.tinypic.com/34qlq12.jpg"/>
 
 ##Details
 
