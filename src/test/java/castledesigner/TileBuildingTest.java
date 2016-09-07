@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 David Green
+ * Copyright (c) 2012-2016 David Green
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,46 +20,18 @@
  */
 package castledesigner;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author David Green
  */
-public class TileBuildingTest extends TestCase
+public class TileBuildingTest
 {
-	public TileBuildingTest(String testName)
-	{
-		super(testName);
-	}
-
-	public static Test suite()
-	{
-		TestSuite suite = new TestSuite(TileBuildingTest.class);
-		return suite;
-	}
-	
-	@Override
-	protected void setUp() throws Exception
-	{
-		super.setUp();
-	}
-	
-	@Override
-	protected void tearDown() throws Exception
-	{
-		super.tearDown();
-	}
-
-	/**
-	 * Test of getBuildingType method, of class TileBuilding.
-	 */
+	@Test
 	public void testGetBuildingType()
 	{
-		System.out.println("getBuildingType");
-
 		for (BuildingType buildingType : BuildingType.values())
 		{
 			TileBuilding building = new TileBuilding(buildingType, 20);
@@ -67,26 +39,18 @@ public class TileBuildingTest extends TestCase
 		}
 	}
 
-	/**
-	 * Test of getBuildingId method, of class TileBuilding.
-	 */
+	@Test
 	public void testGetBuildingId()
 	{
-		System.out.println("getBuildingId");
-
 		int buildingId = 934;
 
 		TileBuilding tileBuilding = new TileBuilding(BuildingType.SMALL_TOWER, buildingId);
 		assertEquals(buildingId, tileBuilding.getBuildingId());
 	}
 
-	/**
-	 * Test of setBuildingId method, of class TileBuilding.
-	 */
+	@Test
 	public void testSetBuildingId()
 	{
-		System.out.println("setBuildingId");
-
 		int buildingId = 555;
 
 		TileBuilding tileBuilding = new TileBuilding(BuildingType.LOOKOUT_TOWER, 99);

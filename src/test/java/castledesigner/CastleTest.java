@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 David Green
+ * Copyright (c) 2012-2016 David Green
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,52 +21,20 @@
 package castledesigner;
 
 import java.awt.Point;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author David Green
  */
-public class CastleTest extends TestCase
+public class CastleTest
 {
-	public CastleTest(String testName)
+	@Test
+	public void testGetGridDataWithinBoundries()
 	{
-		super(testName);
-	}
-
-	public static Test suite()
-	{
-		TestSuite suite = new TestSuite(CastleTest.class);
-		return suite;
-	}
-
-	@Override
-	protected void setUp() throws Exception
-	{
-		super.setUp();
-	}
-
-	@Override
-	protected void tearDown() throws Exception
-	{
-		super.tearDown();
-	}
-
-	/**
-	 * Test of getGridData method, of class Castle.
-	 */
-	public void testGetGridData()
-	{
-		System.out.println("getGridData");
-
 		Castle instance = new Castle();
 
 		for (int i=0; i<Castle.CASTLE_BOUNDRY_LENGTH; i++)
@@ -77,267 +45,156 @@ public class CastleTest extends TestCase
 				instance.getGridData(i, j);
 			}
 		}
-
-		try
-		{
-			instance.getGridData(-1, -1);
-			fail("Exception expected");
-		}
-		catch (ArrayIndexOutOfBoundsException e)
-		{
-		}
-
-		try
-		{
-			instance.getGridData(Castle.CASTLE_BOUNDRY_LENGTH, 1);
-			fail("Exception expected");
-		}
-		catch (ArrayIndexOutOfBoundsException e)
-		{
-		}
 	}
 
-	/**
-	 * Test of removeBuilding method, of class Castle.
-	 */
-	public void testRemoveBuilding()
+	@Test(expected = ArrayIndexOutOfBoundsException.class)
+	public void testGetGridDataWithNegativeCoordinates()
 	{
-		System.out.println("removeBuilding");
+		Castle instance = new Castle();
+		instance.getGridData(-1, -1);
+	}
 
+	@Test(expected = ArrayIndexOutOfBoundsException.class)
+	public void testGetGridDataWithInvalidCoordinates()
+	{
+		Castle instance = new Castle();
+		instance.getGridData(Castle.CASTLE_BOUNDRY_LENGTH, 1);
+	}
+
+	@Test
+	public void testRemoveBuilding() throws Exception
+	{
 		Castle instance = new Castle();
 
-		String importString;
-		try
+		String importString = LayoutUtils.getImportString("typical");
+		instance.importData(importString);
+
+		Set<Integer> ids = new HashSet<>();
+		for (int i=0; i<Castle.CASTLE_BOUNDRY_LENGTH; i++)
 		{
-			importString = LayoutUtils.getImportString("typical");
-			instance.importData(importString);
-
-			Set<Integer> ids = new HashSet<Integer>();
-			for (int i=0; i<Castle.CASTLE_BOUNDRY_LENGTH; i++)
+			for (int j=0; j<Castle.CASTLE_BOUNDRY_LENGTH; j++)
 			{
-				for (int j=0; j<Castle.CASTLE_BOUNDRY_LENGTH; j++)
+				TileBuilding tileBuilding = instance.getGridData(i, j);
+				if (tileBuilding != null)
 				{
-					TileBuilding tileBuilding = instance.getGridData(i, j);
-					if (tileBuilding != null)
-					{
-						int id = tileBuilding.getBuildingId();
+					int id = tileBuilding.getBuildingId();
 
-						assertFalse(ids.contains(id));
+					assertFalse(ids.contains(id));
 
-						instance.removeBuilding(tileBuilding);
-						ids.add(id);
-					}
+					instance.removeBuilding(tileBuilding);
+					ids.add(id);
 				}
 			}
 		}
-		catch (IOException ex)
-		{
-			Logger.getLogger(CastleTest.class.getName()).log(Level.SEVERE, null, ex);
-		}
-		catch (InvalidBarcodeException ex)
-		{
-			Logger.getLogger(CastleTest.class.getName()).log(Level.SEVERE, null, ex);
-		}
-		catch (UnsupportedVersionException ex)
-		{
-			Logger.getLogger(CastleTest.class.getName()).log(Level.SEVERE, null, ex);
-		}
 		
-		try
+		for (int i=0; i<Castle.CASTLE_BOUNDRY_LENGTH; i++)
 		{
-			instance.removeBuilding(null);
-			fail("Exception expected");
-		}
-		catch (IllegalArgumentException e)
-		{
+			for (int j=0; j<Castle.CASTLE_BOUNDRY_LENGTH; j++)
+			{
+				TileBuilding tileBuilding = instance.getGridData(i, j);
+				assertNull(tileBuilding); //All buildings should have been removed
+			}
 		}
 	}
 
-	/**
-	 * Test of resetGridData method, of class Castle.
-	 */
-	public void testResetGridData()
+	@Test(expected = IllegalArgumentException.class)
+	public void testRemoveBuildingNull() throws Exception
 	{
-		System.out.println("resetGridData");
+		Castle instance = new Castle();
 
+		instance.removeBuilding(null);
+	}
+
+	@Test
+	public void testResetGridData() throws Exception
+	{
 		Castle instance = new Castle();
 		
 		String clearExportString = instance.getGridDataExport();
-		System.out.println("clear = " + clearExportString);
 
-		try
+		for (String importString : LayoutUtils.getImportStrings())
 		{
-			for (String importString : LayoutUtils.getImportStrings())
-			{
-				instance.importData(importString);
+			instance.importData(importString);
 
-				instance.resetGridData();
+			instance.resetGridData();
 
-		System.out.println("a = " + instance.getGridDataExport());
-				assertEquals(clearExportString.substring(1), instance.getGridDataExport().substring(1));
-			}
-		}
-		catch (InvalidBarcodeException ex)
-		{
-			Logger.getLogger(CastleTest.class.getName()).log(Level.SEVERE, null, ex);
-			fail("Error reading resources layout");
-		}
-		catch (UnsupportedVersionException ex)
-		{
-			Logger.getLogger(CastleTest.class.getName()).log(Level.SEVERE, null, ex);
-			fail("Error reading resources layout");
-		}
-		catch (FileNotFoundException ex)
-		{
-			Logger.getLogger(CastleTest.class.getName()).log(Level.SEVERE, null, ex);
-			fail("Error reading resources layout");
-		}
-		catch (IOException ex)
-		{
-			Logger.getLogger(CastleTest.class.getName()).log(Level.SEVERE, null, ex);
-			fail("Error reading resources layout");
+			assertEquals(clearExportString.substring(1), instance.getGridDataExport().substring(1));
 		}
 	}
 
-	/**
-	 * Test of getGridDataExport method, of class Castle.
-	 */
-	public void testGetGridDataExport()
+	@Test
+	public void testGetGridDataExport() throws Exception
 	{
-		System.out.println("getGridDataExport");
-
 		Castle instance = new Castle();
 		
-		try
+		for (String importString : LayoutUtils.getImportStrings())
 		{
-			for (String importString : LayoutUtils.getImportStrings())
-			{
-				instance.importData(importString);
-				String exportString = instance.getGridDataExport();
+			instance.importData(importString);
+			String exportString = instance.getGridDataExport();
 
-				instance.resetGridData();
-				instance.importData(exportString);
+			instance.resetGridData();
+			instance.importData(exportString);
 
-				System.out.println("importString = " + importString);
-				System.out.println("exportString = " + exportString);
-				System.out.println("newExportString = " + instance.getGridDataExport());
-				/*
-				 * This test shows that what was exported can
-				 * be imported to give the same export result.
-				 */
-				assertEquals(exportString.substring(1), instance.getGridDataExport().substring(1));
-			}
+			System.out.println("importString = " + importString);
+			System.out.println("exportString = " + exportString);
+			System.out.println("newExportString = " + instance.getGridDataExport());
+			/*
+			 * This test shows that what was exported can
+			 * be imported to give the same export result.
+			 */
+			assertEquals(exportString.substring(1), instance.getGridDataExport().substring(1));
 		}
-		catch (InvalidBarcodeException ex)
-		{
-			Logger.getLogger(CastleTest.class.getName()).log(Level.SEVERE, null, ex);
-			fail("Error reading resources layout");
-		}
-		catch (UnsupportedVersionException ex)
-		{
-			Logger.getLogger(CastleTest.class.getName()).log(Level.SEVERE, null, ex);
-			fail("Error reading resources layout");
-		}
-		catch (FileNotFoundException ex)
-		{
-			Logger.getLogger(CastleTest.class.getName()).log(Level.SEVERE, null, ex);
-			fail("Error reading resources layout");
-		}
-		catch (IOException ex)
-		{
-			Logger.getLogger(CastleTest.class.getName()).log(Level.SEVERE, null, ex);
-			fail("Error reading resources layout");
-		}
+	}
+
+	@Test
+	public void testGetGridDataExportTestUpToDate() throws Exception
+	{
+		Castle instance = new Castle();
 
 		boolean suitableTestFound = false;
-		try
+		for (String importString : LayoutUtils.getImportStrings())
 		{
-			for (String importString : LayoutUtils.getImportStrings())
+			if (Character.getNumericValue(importString.charAt(0)) == Castle.exportVersionId)
 			{
-				if (Character.getNumericValue(importString.charAt(0)) == Castle.exportVersionId)
-				{
-					suitableTestFound = true;
-					
-					instance.resetGridData();
-					instance.importData(importString);
+				suitableTestFound = true;
+				
+				instance.resetGridData();
+				instance.importData(importString);
 
-					assertEquals(importString, instance.getGridDataExport());
-				}
+				assertEquals(importString, instance.getGridDataExport());
 			}
-		}
-		catch (IOException ex)
-		{
-			Logger.getLogger(CastleTest.class.getName()).log(Level.SEVERE, null, ex);
-			fail("Error reading resources layout");
-		}
-		catch (InvalidBarcodeException ex)
-		{
-			Logger.getLogger(CastleTest.class.getName()).log(Level.SEVERE, null, ex);
-			fail("Error reading resources layout");
-		}
-		catch (UnsupportedVersionException ex)
-		{
-			Logger.getLogger(CastleTest.class.getName()).log(Level.SEVERE, null, ex);
-			fail("Error reading resources layout");
 		}
 
 		if (suitableTestFound == false) fail("No designs found that use the new export version ID");
 	}
 
-
-	/**
-	 * Test of importData method, of class Castle.
-	 */
-	public void testImportData()
+	@Test
+	public void testImportData() throws Exception
 	{
-		System.out.println("importData");
-
 		Castle instance = new Castle();
 		/**
 		 * It's difficult to test this without messing around with
 		 * reflection. I'll just accept a limited test for now.
 		 */
-		try
+		for (String importString : LayoutUtils.getImportStrings())
 		{
-			for (String importString : LayoutUtils.getImportStrings())
-			{
-				instance.importData(importString);
+			instance.importData(importString);
 
-				if (Character.getNumericValue(importString.charAt(0)) == Castle.exportVersionId)
-				{
-					assertEquals(importString.substring(1), instance.getGridDataExport().substring(1));
-				}
+			if (Character.getNumericValue(importString.charAt(0)) == Castle.exportVersionId)
+			{
+				assertEquals(importString.substring(1), instance.getGridDataExport().substring(1));
 			}
-		}
-		catch (IOException ex)
-		{
-			Logger.getLogger(CastleTest.class.getName()).log(Level.SEVERE, null, ex);
-			fail("Error reading resources layout");
-		}
-		catch (InvalidBarcodeException ex)
-		{
-			Logger.getLogger(CastleTest.class.getName()).log(Level.SEVERE, null, ex);
-			fail("Error reading resources layout");
-		}
-		catch (UnsupportedVersionException ex)
-		{
-			Logger.getLogger(CastleTest.class.getName()).log(Level.SEVERE, null, ex);
-			fail("Error reading resources layout");
 		}
 	}
 
-	/**
-	 * Test of addBuilding method, of class Castle.
-	 */
-	public void testAddBuilding()
+	@Test
+	public void testAddBuilding2x2()
 	{
-		System.out.println("addBuilding");
-
 		Castle instance = new Castle();
 
 		for (BuildingType buildingType : BuildingType.values())
 		{
-			Set<Point> points = new HashSet<Point>();
+			Set<Point> points = new HashSet<>();
 
 			Point p1 = new Point(0, 0);
 			Point p2 = new Point(1, 0);
@@ -356,8 +213,17 @@ public class CastleTest extends TestCase
 				TileBuilding tileBuilding = instance.getGridData(point.x, point.y);
 				assertEquals(buildingType, tileBuilding.getBuildingType());
 			}
+		}
+	}
+	
+	@Test
+	public void testAddBuilding1x1()
+	{
+		Castle instance = new Castle();
 
-			Set<Point> lonelyPoint = new HashSet<Point>();
+		for (BuildingType buildingType : BuildingType.values())
+		{
+			Set<Point> lonelyPoint = new HashSet<>();
 
 			Point q1 = new Point(30, 20);
 
@@ -369,48 +235,29 @@ public class CastleTest extends TestCase
 		}
 	}
 
-	/**
-	 * Test of getDesignErrors method, of class Castle.
-	 */
-	public void testGetDesignErrors()
+	@Test
+	public void testGetDesignErrorsWaterworld() throws Exception
 	{
-		System.out.println("getDesignErrors");
-
 		Castle instance = new Castle();
-		try
-		{
-			String importString = LayoutUtils.getImportString("waterworld");
-			instance.importData(importString);
-			assertEquals(1, instance.getDesignErrors().size());
 
-			importString = LayoutUtils.getImportString("typical");
-			instance.importData(importString);
-			assertTrue(instance.getDesignErrors().isEmpty());
-		}
-		catch (IOException ex)
-		{
-			Logger.getLogger(CastleTest.class.getName()).log(Level.SEVERE, null, ex);
-			fail("Error reading resources layout");
-		}
-		catch (InvalidBarcodeException ex)
-		{
-			Logger.getLogger(CastleTest.class.getName()).log(Level.SEVERE, null, ex);
-			fail("Error reading resources layout");
-		}
-		catch (UnsupportedVersionException ex)
-		{
-			Logger.getLogger(CastleTest.class.getName()).log(Level.SEVERE, null, ex);
-			fail("Error reading resources layout");
-		}
+		String importString = LayoutUtils.getImportString("waterworld");
+		instance.importData(importString);
+		assertEquals(1, instance.getDesignErrors().size());
 	}
 
-	/**
-	 * Test of getNumberOfBuildings method, of class Castle.
-	 */
+	@Test
+	public void testGetDesignErrorsTypical() throws Exception
+	{
+		Castle instance = new Castle();
+
+		String importString = LayoutUtils.getImportString("typical");
+		instance.importData(importString);
+		assertTrue(instance.getDesignErrors().isEmpty());
+	}
+
+	@Test
 	public void testGetNumberOfBuildings()
 	{
-		System.out.println("getNumberOfBuildings");
-
 		Castle instance = new Castle();
 
 		for (BuildingType buildingType : BuildingType.values())
@@ -424,13 +271,9 @@ public class CastleTest extends TestCase
 		}
 	}
 
-	/**
-	 * Test of getMaximumNumberOfBuildings method, of class Castle.
-	 */
+	@Test
 	public void testGetMaximumNumberOfBuildings()
 	{
-		System.out.println("getMaximumNumberOfBuildings");
-
 		Castle instance = new Castle();
 
 		for (BuildingType buildingType : BuildingType.values())
@@ -443,13 +286,9 @@ public class CastleTest extends TestCase
 		}
 	}
 
-	/**
-	 * Test of getTotalResource method, of class Castle.
-	 */
+	@Test
 	public void testGetTotalResource()
 	{
-		System.out.println("getTotalResource");
-
 		Castle instance = new Castle();
 
 		for (BuildingResource buildingResource : BuildingResource.values())
@@ -463,13 +302,9 @@ public class CastleTest extends TestCase
 		}
 	}
 
-	/**
-	 * Test of getTotalBuildingTime method, of class Castle.
-	 */
+	@Test
 	public void testGetTotalBuildingTime()
 	{
-		System.out.println("getTotalBuildingTime");
-
 		Castle instance = new Castle();
 
 		/*

@@ -87,7 +87,7 @@ public enum BuildingType
 	 * @param gapRequired true if this building cannot be placed next to
 	 *                    other buildings that also have this set to true
 	 */
-	private BuildingType(Color colour, Dimension dimension, boolean gapRequired, Integer[] resourceCosts, int buildTime)
+	BuildingType(Color colour, Dimension dimension, boolean gapRequired, Integer[] resourceCosts, int buildTime)
 	{
 		this.colour = colour;
 		this.dimension = dimension;

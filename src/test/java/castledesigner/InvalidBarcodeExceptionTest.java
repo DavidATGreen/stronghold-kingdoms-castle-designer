@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 David Green
+ * Copyright (c) 2012-2016 David Green
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,39 +20,16 @@
  */
 package castledesigner;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author David Green
  */
-public class InvalidBarcodeExceptionTest extends TestCase
+public class InvalidBarcodeExceptionTest
 {
-	public InvalidBarcodeExceptionTest(String testName)
-	{
-		super(testName);
-	}
-
-	public static Test suite()
-	{
-		TestSuite suite = new TestSuite(InvalidBarcodeExceptionTest.class);
-		return suite;
-	}
-	
-	@Override
-	protected void setUp() throws Exception
-	{
-		super.setUp();
-	}
-	
-	@Override
-	protected void tearDown() throws Exception
-	{
-		super.tearDown();
-	}
-
+	@Test
 	public void testExceptionReason()
 	{
 		String myReason = "My exception reason";

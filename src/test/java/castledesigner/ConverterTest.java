@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012 David Green
+ * Copyright (c) 2012-2016 David Green
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,96 +20,66 @@
  */
 package castledesigner;
 
-import junit.framework.Test;
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author David Green
  */
-public class ConverterTest extends TestCase
+public class ConverterTest
 {
-	public ConverterTest(String testName)
-	{
-		super(testName);
-	}
-
-	public static Test suite()
-	{
-		TestSuite suite = new TestSuite(ConverterTest.class);
-		return suite;
-	}
-
-	@Override
-	protected void setUp() throws Exception
-	{
-		super.setUp();
-	}
-
-	@Override
-	protected void tearDown() throws Exception
-	{
-		super.tearDown();
-	}
-
-	/**
-	 * Test of intToAlphaNumeric method, of class Converter.
-	 */
+	@Test
 	public void testIntToAlphaNumeric()
 	{
-		System.out.println("intToAlphaNumeric");
 		assertEquals('0', Converter.intToAlphaNumeric(0));
 		assertEquals('a', Converter.intToAlphaNumeric(10));
 		assertEquals('f', Converter.intToAlphaNumeric(15));
 		assertEquals('Y', Converter.intToAlphaNumeric(60));
-		
-		try
-		{
-			Converter.intToAlphaNumeric(-1);
-			fail("Expected IllegalArgumentException");
-		} catch (IllegalArgumentException e) { }
-
-		try
-		{
-			Converter.intToAlphaNumeric(61);
-			fail("Expected IllegalArgumentException");
-		} catch (IllegalArgumentException e) { }
-
-		try
-		{
-			Converter.intToAlphaNumeric(Integer.MAX_VALUE);
-			fail("Expected IllegalArgumentException");
-		} catch (IllegalArgumentException e) { }
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testIntToAlphaNumericNegative()
+	{
+		Converter.intToAlphaNumeric(-1);
 	}
 
-	/**
-	 * Test of alphaNumericToInt method, of class Converter.
-	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void testIntToAlphaNumericOutOfBounds()
+	{
+		Converter.intToAlphaNumeric(61);
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void testIntToAlphaNumericMaxInteger()
+	{
+		Converter.intToAlphaNumeric(Integer.MAX_VALUE);
+	}
+
+	@Test
 	public void testAlphaNumericToInt()
 	{
-		System.out.println("alphaNumericToInt");
 		assertEquals(0, Converter.alphaNumericToInt('0'));
 		assertEquals(10, Converter.alphaNumericToInt('a'));
 		assertEquals(15, Converter.alphaNumericToInt('f'));
 		assertEquals(60, Converter.alphaNumericToInt('Y'));
+	}
 
-		try
-		{
-			Converter.alphaNumericToInt(' ');
-			fail("Expected IllegalArgumentException");
-		} catch (IllegalArgumentException e) { }
+	@Test(expected = IllegalArgumentException.class)
+	public void testAlphaNumericToIntSpace()
+	{
+		Converter.alphaNumericToInt(' ');
+	}
 
-		try
-		{
-			Converter.alphaNumericToInt('Z');
-			fail("Expected IllegalArgumentException");
-		} catch (IllegalArgumentException e) { }
+	@Test(expected = IllegalArgumentException.class)
+	public void testAlphaNumericToIntZ()
+	{
+		Converter.alphaNumericToInt('Z');
+	}
 
-		try
-		{
-			Converter.alphaNumericToInt('+');
-			fail("Expected IllegalArgumentException");
-		} catch (IllegalArgumentException e) { }
+	@Test(expected = IllegalArgumentException.class)
+	public void testAlphaNumericToIntPlus()
+	{
+		Converter.alphaNumericToInt('+');
 	}
 }
